@@ -48,7 +48,9 @@ export function useTabManager() {
   const closeTab = useCallback((id: string) => {
     setTabsState(prev => {
       if (prev.length === 1) {
-        return [createTab()];
+        const fresh = createTab();
+        setActiveId(fresh.id);
+        return [fresh];
       }
       const idx = prev.findIndex(t => t.id === id);
       const next = prev.filter(t => t.id !== id);

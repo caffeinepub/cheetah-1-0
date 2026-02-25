@@ -1,81 +1,93 @@
 {
   "kind": "build_request",
-  "title": "Add Falcon Cloaking Mode Options (about:blank, https://error, 123456789101112)",
-  "projectName": "Cheetah 1.0",
-  "priority": "normal",
+  "title": "Fix search functionality and website proxy connections",
+  "projectName": "Cheetah Browser",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-15",
-      "text": "Add a cloaking mode selector to the Falcon Cloaking feature in the frontend. The user must be able to choose from three disguise modes before or when triggering the cloak: (1) 'about:blank' — opens the app in a popup/tab that shows about:blank in the address bar; (2) 'https://error' — opens the app disguised under an https://error URL appearance; (3) '123456789101112' — opens the app disguised under a numeric string URL appearance. Persist the selected mode in component state so it is remembered across cloak triggers within the session.",
-      "target": "frontend",
+      "id": "REQ-1",
+      "text": "Fix the Google Custom Search API integration in the backend so that search queries return real, populated results. Ensure the HTTP outcall to the Google Custom Search API is correctly constructed with the API key and Search Engine ID, and that the response is properly parsed and returned to the frontend.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-6"
         ],
         "quotes": [
-          "make a options for the cloaking the cloaking is for the falcon only and you can choose for the falcon 1, about:blank 2, https://error 3, 123456789101112"
+          "make actual searches work"
         ]
       },
       "acceptanceCriteria": [
-        "A mode selector (e.g., dropdown or segmented control) is visible in the Falcon Cloaking section of the UI, presenting options: 'about:blank', 'https://error', and '123456789101112'.",
-        "Selecting 'about:blank' and triggering the cloak opens the app in a new blank-URL popup/tab with about:blank visible in the browser address bar.",
-        "Selecting 'https://error' and triggering the cloak opens the app in a new popup/tab where the address bar shows https://error.",
-        "Selecting '123456789101112' and triggering the cloak opens the app in a new popup/tab where the address bar shows the numeric string '123456789101112'.",
-        "The selected mode persists in state and is pre-selected the next time the user opens the cloak options.",
-        "The mode selector and cloak trigger are only present in the Falcon Cloaking UI — not in the main browser toolbar or tab bar."
+        "Submitting a search query returns a non-empty list of results with title, snippet, and URL fields populated",
+        "Search results are displayed in the SearchResults component",
+        "Errors from the search API are surfaced as readable messages on the frontend"
       ]
     },
     {
-      "id": "REQ-16",
-      "text": "Update useCloaking.ts to accept a cloakMode parameter ('about:blank' | 'https://error' | '123456789101112') and apply the appropriate URL disguise technique for each mode. For 'about:blank', use the existing blank popup approach. For 'https://error', open the popup/window and push or replace the history state to display 'https://error' as the visible URL. For '123456789101112', open the popup/window and set the visible URL to the numeric string '123456789101112' using the History API or equivalent popup technique.",
-      "target": "frontend",
+      "id": "REQ-2",
+      "text": "Fix the proxy backend endpoint so that HTTP GET requests to external websites succeed. Ensure HTTPS enforcement, proper header forwarding, and that the response body is returned intact to the frontend iframe. Debug and resolve any issues causing proxied sites to fail to load.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-6"
         ],
         "quotes": [
-          "makethis cloak for the url too"
+          "make all websites function and connect"
         ]
       },
       "acceptanceCriteria": [
-        "useCloaking.ts exports a cloak function that accepts a mode argument.",
-        "When mode is 'about:blank', the cloaked window/tab shows about:blank in the browser address bar.",
-        "When mode is 'https://error', the cloaked window/tab shows https://error in the browser address bar.",
-        "When mode is '123456789101112', the cloaked window/tab shows 123456789101112 in the browser address bar.",
-        "In all three modes, the full Cheetah app content renders inside the cloaked window."
+        "Navigating to a URL in the address bar loads the proxied website content inside the iframe",
+        "The ProxyContent component displays the proxied page without blank/error states under normal conditions",
+        "HTTPS URLs are correctly forwarded and responses are returned to the frontend"
       ]
     },
     {
-      "id": "REQ-17",
-      "text": "Update CloakButton.tsx to integrate the new mode selector UI. Replace or augment the existing single-action cloak button with a compact control that shows the current selected mode and allows switching between the three modes ('about:blank', 'https://error', '123456789101112'). The cloak action button should trigger the cloak using the currently selected mode. Style the selector consistently with the existing dark cheetah theme (dark background, yellow-orange accents).",
+      "id": "REQ-3",
+      "text": "Fix the frontend `useProxyRequest` and `useSearchRequest` mutations in useQueries.ts so they correctly call the backend actor methods and handle both success and error responses. Ensure loading, error, and success states are properly reflected in BrowserLayout and the tab state via useTabManager.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-recent"
+          "msg-6"
         ],
         "quotes": [
-          "make a options for the cloaking the cloaking is for the falcon only"
+          "make actual searches work and make all websites function and connect"
         ]
       },
       "acceptanceCriteria": [
-        "CloakButton.tsx renders a mode selector alongside the falcon cloak trigger button.",
-        "The mode selector displays the three options: 'about:blank', 'https://error', '123456789101112'.",
-        "Clicking the cloak button triggers the selected mode via the updated useCloaking hook.",
-        "The component is styled using the existing dark/yellow-orange cheetah color tokens from Tailwind config.",
-        "No other toolbar components are modified."
+        "Entering a URL and pressing Enter triggers a proxy request and populates the active tab with content",
+        "Entering a search query and pressing Enter triggers a search request and populates the active tab with search results",
+        "Loading indicators appear in TabBar while requests are in flight",
+        "Error states are shown when requests fail"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Ensure that clicking a search result in SearchResults.tsx triggers navigation to that URL through the proxy, loading the linked website in the same tab via the ProxyContent iframe.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "make all websites function and connect"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Clicking a search result URL navigates to the proxied version of that site in the active tab",
+        "The address bar updates to reflect the navigated URL",
+        "The tab transitions from showing search results to showing proxied web content"
       ]
     }
   ],
   "constraints": [
-    "Cloaking options and mode selector must only appear in the Falcon Cloaking UI — do not expose them elsewhere in the app.",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
-    "No backend changes are required for this feature."
+    "Do not modify files listed in frontend.immutablePaths",
+    "All backend logic must remain in the single main actor (backend/main.mo)",
+    "Do not change the existing tab management data model unless required to fix broken state"
   ],
   "nonGoals": [
-    "Adding any new cloaking modes beyond the three specified (about:blank, https://error, 123456789101112).",
-    "Persisting the selected cloak mode to the backend or across browser sessions.",
-    "Modifying the proxy, search, or tab system logic.",
-    "Changing the existing hotkey (Cmd+Tab+H) behavior unrelated to mode selection."
+    "Adding new UI features or redesigning the visual theme",
+    "Implementing user authentication or Internet Identity login",
+    "Supporting non-HTTP/HTTPS protocols in the proxy",
+    "Adding new cloaking modes"
   ],
   "imageRequirements": {
     "required": [],

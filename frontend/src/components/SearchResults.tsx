@@ -58,7 +58,7 @@ export function SearchResults({ query, results, totalResults, onNavigate }: Sear
         {/* Footer note */}
         <div className="mt-8 pt-4 border-t border-cheetah-border/30 text-center">
           <p className="text-[10px] text-muted-foreground font-mono">
-            Powered by Google Custom Search · Cheetah 1.0
+            Powered by Google Custom Search · Cheetah
           </p>
         </div>
       </div>
@@ -74,7 +74,9 @@ interface SearchResultItemProps {
 function SearchResultItem({ result, onNavigate }: SearchResultItemProps) {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    onNavigate(result.link);
+    if (result.link) {
+      onNavigate(result.link);
+    }
   };
 
   return (
@@ -89,7 +91,7 @@ function SearchResultItem({ result, onNavigate }: SearchResultItemProps) {
         </span>
       </div>
 
-      {/* Title */}
+      {/* Title — clickable */}
       <button
         onClick={handleClick}
         className="text-left text-sm font-semibold text-cheetah-orange hover:text-cheetah-yellow transition-colors leading-snug group-hover:underline underline-offset-2"

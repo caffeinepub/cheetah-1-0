@@ -1,110 +1,24 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 11,
-  "summary": "Cheetah 1.0 — a web proxy app with a built-in search engine, about:blank cloaking (falcon cloaking), and an internal tab system that restricts navigation to user-typed URLs only. Built as a server-side web framework using Swift, SwiftNIO, Swift Package Manager, and Fluent ORM for backend APIs and web applications.",
-  "architectural_notes": [
-    "Built with Swift using SwiftNIO for asynchronous server-side programming",
-    "Uses Swift Package Manager for dependency management",
-    "Uses Fluent ORM for database interactions",
-    "About:blank cloaking hides the app in a blank-looking browser tab",
-    "Google Custom Search Engine ID: a566dfe30b89f4713 used for search queries"
-  ],
+  "projectStateVersion": 3,
+  "summary": "App with search functionality and website connections. User wants actual searches to work and all websites to be functional and connected.",
+  "architectural_notes": [],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-implement-a-built-in-search-engine-feature-when-the-user-types-a-search-query-non-url-text-into-the-address-bar-route-the-query-through-a-search-provider-e-g-duckduckgo-via-proxy-and-display-results-within-the-app",
-      "title": "Implement a built-in search engine feature: when the user types a search query (non-URL text) into the address bar, route the query through a search provider (e.g., DuckDuckGo via proxy) and display results within the app.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-an-about-blank-cloaking-feature-referred-to-as-falcon-cloaking-provide-a-button-or-hotkey-that-opens-the-cheetah-1-0-app-inside-a-new-browser-tab-window-that-displays-about-blank-in-the-address-bar-disguising-the-app-s-true-url",
-      "title": "Implement an About:Blank cloaking feature (referred to as 'falcon cloaking'): provide a button or hotkey that opens the Cheetah 1.0 app inside a new browser tab/window that displays 'about:blank' in the address bar, disguising the app's true URL.",
+      "id": "feature-fix-the-frontend-useproxyrequest-and-usesearchrequest-mutations-in-usequeries-ts-so-they-correctly-call-the-backend-actor-methods-and-handle-both-success-and-error-responses-ensure-loading-error-and-success-states-are-properly-reflected-in-browserlayout-and-the-tab-state-via-usetabmanager",
+      "title": "Fix the frontend `useProxyRequest` and `useSearchRequest` mutations in useQueries.ts so they correctly call the backend actor methods and handle both success and error responses. Ensure loading, error, and success states are properly reflected in BrowserLayout and the tab state via useTabManager.",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-an-internal-tab-system-within-the-cheetah-1-0-single-page-app-each-tab-maintains-its-own-url-history-and-displays-proxied-content-new-tabs-can-only-navigate-to-urls-that-the-user-manually-types-into-the-address-bar-within-the-app-no-external-link-clicks-that-escape-the-proxy",
-      "title": "Implement an internal tab system within the Cheetah 1.0 single-page app. Each tab maintains its own URL history and displays proxied content. New tabs can only navigate to URLs that the user manually types into the address bar within the app — no external link clicks that escape the proxy.",
+      "id": "feature-ensure-that-clicking-a-search-result-in-searchresults-tsx-triggers-navigation-to-that-url-through-the-proxy-loading-the-linked-website-in-the-same-tab-via-the-proxycontent-iframe",
+      "title": "Ensure that clicking a search result in SearchResults.tsx triggers navigation to that URL through the proxy, loading the linked website in the same tab via the ProxyContent iframe.",
       "reqIds": [
         "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-design-a-sleek-fast-feeling-dark-browser-style-visual-theme-for-cheetah-1-0-use-a-dark-charcoal-black-background-with-vibrant-yellow-orange-cheetah-inspired-accent-colors-sharp-typography-and-a-minimal-toolbar-layout-reminiscent-of-a-modern-browser-ui-apply-the-theme-consistently-across-all-components-tab-bar-address-bar-search-results-and-proxied-content-frame",
-      "title": "Design a sleek, fast-feeling dark browser-style visual theme for Cheetah 1.0. Use a dark charcoal/black background with vibrant yellow-orange (cheetah-inspired) accent colors, sharp typography, and a minimal toolbar layout reminiscent of a modern browser UI. Apply the theme consistently across all components: tab bar, address bar, search results, and proxied content frame.",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-the-frontend-address-bar-and-navigation-logic-addressbar-tsx-browserlayout-tsx-normalize-any-url-the-user-types-before-sending-it-to-the-proxy-if-the-input-starts-with-http-rewrite-it-to-https-if-it-has-no-scheme-and-looks-like-a-url-contains-a-dot-and-no-spaces-prepend-https-display-the-normalized-https-url-in-the-address-bar-after-navigation",
-      "title": "In the frontend address bar and navigation logic (AddressBar.tsx, BrowserLayout.tsx), normalize any URL the user types before sending it to the proxy: if the input starts with http://, rewrite it to https://; if it has no scheme and looks like a URL (contains a dot and no spaces), prepend https://. Display the normalized https:// URL in the address bar after navigation.",
-      "reqIds": [
-        "REQ-8"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-frontend-search-result-handling-in-usequeries-ts-and-any-search-result-rendering-components-to-correctly-parse-and-display-results-returned-from-the-google-custom-search-api-response-format-items-array-with-title-link-snippet-fields-replacing-any-prior-duckduckgo-specific-result-parsing",
-      "title": "Update the frontend search result handling in useQueries.ts and any search result rendering components to correctly parse and display results returned from the Google Custom Search API response format (items array with title, link, snippet fields), replacing any prior DuckDuckGo-specific result parsing.",
-      "reqIds": [
-        "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-meta-name-description-tag-and-update-the-title-in-frontend-index-html-to-use-a-generic-innocuous-sounding-name-e-g-study-tools-or-research-hub-so-the-page-title-and-meta-description-do-not-reveal-the-proxy-nature-of-the-app-to-content-filtering-scanners",
-      "title": "Add a <meta name='description'> tag and update the <title> in frontend/index.html to use a generic, innocuous-sounding name (e.g., 'Study Tools' or 'Research Hub') so the page title and meta description do not reveal the proxy nature of the app to content filtering scanners.",
-      "reqIds": [
-        "REQ-11"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-frontend-index-html-add-a-meta-name-robots-content-noindex-nofollow-tag-and-ensure-no-og-title-og-description-or-og-site-name-open-graph-tags-expose-the-app-s-proxy-purpose-so-web-filtering-classification-services-cannot-easily-categorize-it",
-      "title": "In frontend/index.html, add a <meta name='robots' content='noindex, nofollow'> tag and ensure no og:title, og:description, or og:site_name Open Graph tags expose the app's proxy purpose, so web-filtering classification services cannot easily categorize it.",
-      "reqIds": [
-        "REQ-12"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-frontend-src-components-browserlayout-tsx-and-frontend-src-components-proxycontent-tsx-ensure-the-proxied-iframe-does-not-include-attributes-or-identifiers-e-g-title-proxy-frame-data-proxy-attributes-that-content-filtering-browser-extensions-could-use-to-detect-and-block-the-iframe",
-      "title": "In frontend/src/components/BrowserLayout.tsx and frontend/src/components/ProxyContent.tsx, ensure the proxied iframe does not include attributes or identifiers (e.g., title='proxy-frame', data-proxy attributes) that content-filtering browser extensions could use to detect and block the iframe.",
-      "reqIds": [
-        "REQ-14"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-cloaking-mode-selector-to-the-falcon-cloaking-feature-in-the-frontend-the-user-must-be-able-to-choose-from-three-disguise-modes-before-or-when-triggering-the-cloak-1-about-blank-opens-the-app-in-a-popup-tab-that-shows-about-blank-in-the-address-bar-2-https-error-opens-the-app-disguised-under-an-https-error-url-appearance-3-123456789101112-opens-the-app-disguised-under-a-numeric-string-url-appearance-persist-the-selected-mode-in-component-state-so-it-is-remembered-across-cloak-triggers-within-the-session",
-      "title": "Add a cloaking mode selector to the Falcon Cloaking feature in the frontend. The user must be able to choose from three disguise modes before or when triggering the cloak: (1) 'about:blank' — opens the app in a popup/tab that shows about:blank in the address bar; (2) 'https://error' — opens the app disguised under an https://error URL appearance; (3) '123456789101112' — opens the app disguised under a numeric string URL appearance. Persist the selected mode in component state so it is remembered across cloak triggers within the session.",
-      "reqIds": [
-        "REQ-15"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-usecloaking-ts-to-accept-a-cloakmode-parameter-about-blank-https-error-123456789101112-and-apply-the-appropriate-url-disguise-technique-for-each-mode-for-about-blank-use-the-existing-blank-popup-approach-for-https-error-open-the-popup-window-and-push-or-replace-the-history-state-to-display-https-error-as-the-visible-url-for-123456789101112-open-the-popup-window-and-set-the-visible-url-to-the-numeric-string-123456789101112-using-the-history-api-or-equivalent-popup-technique",
-      "title": "Update useCloaking.ts to accept a cloakMode parameter ('about:blank' | 'https://error' | '123456789101112') and apply the appropriate URL disguise technique for each mode. For 'about:blank', use the existing blank popup approach. For 'https://error', open the popup/window and push or replace the history state to display 'https://error' as the visible URL. For '123456789101112', open the popup/window and set the visible URL to the numeric string '123456789101112' using the History API or equivalent popup technique.",
-      "reqIds": [
-        "REQ-16"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-cloakbutton-tsx-to-integrate-the-new-mode-selector-ui-replace-or-augment-the-existing-single-action-cloak-button-with-a-compact-control-that-shows-the-current-selected-mode-and-allows-switching-between-the-three-modes-about-blank-https-error-123456789101112-the-cloak-action-button-should-trigger-the-cloak-using-the-currently-selected-mode-style-the-selector-consistently-with-the-existing-dark-cheetah-theme-dark-background-yellow-orange-accents",
-      "title": "Update CloakButton.tsx to integrate the new mode selector UI. Replace or augment the existing single-action cloak button with a compact control that shows the current selected mode and allows switching between the three modes ('about:blank', 'https://error', '123456789101112'). The cloak action button should trigger the cloak using the currently selected mode. Style the selector consistently with the existing dark cheetah theme (dark background, yellow-orange accents).",
-      "reqIds": [
-        "REQ-17"
       ],
       "version": 1
     }
@@ -112,119 +26,34 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Web proxy functionality that routes requests through the server",
+      "summary": "Make actual search functionality work (real search results)",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Built-in search engine that works within the proxy",
+      "summary": "Make all websites function and connect properly",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "About:blank cloaking (falcon/falcion cloaking) to disguise the app",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Internal tab system that only opens URLs typed within the site",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Swift server-side framework using SwiftNIO for async programming",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Swift Package Manager integration",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Fluent ORM for database interactions",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Backend API and web application support",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "Create a backend proxy endpoint that accepts a target URL, fetches the page server-side, rewrites relative links to route through the proxy, and returns the proxied HTML content to the frontend. This allows the app to load external websites through the server without the browser navigating away.",
+      "summary": "Fix the Google Custom Search API integration in the backend so that search queries return real, populated results. Ensure the HTTP outcall to the Google Custom Search API is correctly constructed with the API key and Search Engine ID, and that the response is properly parsed and returned to the frontend.",
       "reqIds": [
         "REQ-1"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-13",
-      "summary": "Store browsing history and saved/bookmarked URLs per tab session in the backend so users can revisit previously entered URLs. Expose backend query and mutation endpoints to read and write URL history entries.",
+      "id": "AR-4",
+      "summary": "Fix the proxy backend endpoint so that HTTP GET requests to external websites succeed. Ensure HTTPS enforcement, proper header forwarding, and that the response body is returned intact to the frontend iframe. Debug and resolve any issues causing proxied sites to fail to load.",
       "reqIds": [
-        "REQ-5"
+        "REQ-2"
       ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-14",
-      "summary": "Ensure all proxied websites are served over HTTPS (force secure connections for all proxied URLs)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-15",
-      "summary": "In the backend proxy endpoint, before fetching any target URL, enforce HTTPS by upgrading any http:// scheme to https://. If a URL is provided without a scheme, prepend https://. Reject or upgrade insecure http:// requests so that all outbound proxy fetches are made over HTTPS only.",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-16",
-      "summary": "Integrate Google Custom Search Engine (ID: a566dfe30b89f4713) to power the built-in search functionality",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-17",
-      "summary": "Update the backend search endpoint in backend/main.mo to use the Google Custom Search JSON API with the provided Search Engine ID (a566dfe30b89f4713) instead of DuckDuckGo. The endpoint should construct requests to 'https://www.googleapis.com/customsearch/v1' with the query parameter 'q', the 'cx' parameter set to 'a566dfe30b89f4713', and return the parsed search results to the frontend.",
-      "reqIds": [
-        "REQ-9"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-18",
-      "summary": "Implement techniques to prevent content filtering tools (e.g., Blocksi, GoGuardian) from blocking the site, such as obfuscating traffic, using innocuous-looking URLs, or other evasion methods.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-21",
-      "summary": "In the backend (backend/main.mo), add or update the HTTP response headers returned by the proxy endpoint to include generic, neutral headers (e.g., remove or mask any custom 'X-Cheetah-*' headers) and set a conservative Content-Security-Policy that does not signal proxy behavior. Also ensure the User-Agent used in outbound proxy fetch requests is a standard browser UA string rather than a custom one that could be flagged.",
-      "reqIds": [
-        "REQ-13"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-22",
-      "summary": "Add cloaking options for Falcon Cloaking: let the user choose from multiple disguise modes — (1) about:blank, (2) https://error, (3) 123456789101112 — and apply the selected cloak to the visible URL as well as the tab appearance.",
-      "reqIds": [],
       "status": "pending"
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "Cheetah 1.0",
+  "projectName": "Cheetah Browser",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

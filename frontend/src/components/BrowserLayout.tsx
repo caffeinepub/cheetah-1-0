@@ -25,6 +25,19 @@ function normalizeUrl(input: string): string {
   return trimmed;
 }
 
+function extractTitle(html: string, fallback: string): string {
+  const match = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  return match ? match[1].trim().slice(0, 50) : fallback;
+}
+
+function getHostname(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+}
+
 export function BrowserLayout() {
   const { tabs, activeTabId, activeTab, addTab, closeTab, switchTab, updateTab } = useTabManager();
   const proxyMutation = useProxyRequest();
@@ -35,25 +48,28 @@ export function BrowserLayout() {
     const trimmed = input.trim();
     if (!trimmed) return;
 
-    const isUrlInput = isUrl(trimmed);
-    const normalizedUrl = isUrlInput ? normalizeUrl(trimmed) : trimmed;
-    const displayUrl = isUrlInput ? normalizedUrl : `search: ${trimmed}`;
+    // Don't navigate to "search: ..." prefixed strings
+    const cleanInput = trimmed.startsWith('search: ') ? trimmed.slice('search: '.length) : trimmed;
 
+    const isUrlInput = isUrl(cleanInput);
+    const normalizedUrl = isUrlInput ? normalizeUrl(cleanInput) : cleanInput;
+
+    // Set loading state immediately
     updateTab(targetId, {
       isLoading: true,
       error: null,
-      url: displayUrl,
-      title: isUrlInput ? new URL(normalizedUrl).hostname : `${trimmed} - Search`,
+      url: isUrlInput ? normalizedUrl : cleanInput,
+      title: isUrlInput ? getHostname(normalizedUrl) : `${cleanInput} - Search`,
       isNewTab: false,
       searchResults: null,
       searchQuery: null,
+      content: null,
     });
 
     try {
       if (isUrlInput) {
         const content = await proxyMutation.mutateAsync(normalizedUrl);
-        const titleMatch = content.match(/<title[^>]*>([^<]+)<\/title>/i);
-        const title = titleMatch ? titleMatch[1].trim().slice(0, 40) : new URL(normalizedUrl).hostname;
+        const title = extractTitle(content, getHostname(normalizedUrl));
         updateTab(targetId, {
           content,
           isLoading: false,
@@ -62,17 +78,19 @@ export function BrowserLayout() {
           isNewTab: false,
           searchResults: null,
           searchQuery: null,
+          error: null,
         });
       } else {
-        const response = await searchMutation.mutateAsync(trimmed);
+        const response = await searchMutation.mutateAsync(cleanInput);
         updateTab(targetId, {
           content: null,
           searchResults: response.items,
-          searchQuery: trimmed,
+          searchQuery: cleanInput,
           isLoading: false,
-          url: `search: ${trimmed}`,
-          title: `${trimmed} - Search`,
+          url: cleanInput,
+          title: `${cleanInput} - Search`,
           isNewTab: false,
+          error: null,
         });
       }
     } catch (err) {
@@ -86,10 +104,10 @@ export function BrowserLayout() {
   };
 
   const handleReload = () => {
-    if (activeTab?.url && !activeTab.isNewTab) {
+    if (activeTab && !activeTab.isNewTab) {
       if (activeTab.searchQuery) {
         navigate(activeTab.searchQuery, activeTabId);
-      } else {
+      } else if (activeTab.url) {
         navigate(activeTab.url, activeTabId);
       }
     }
@@ -114,6 +132,11 @@ export function BrowserLayout() {
     !activeTab.error &&
     activeTab.searchResults !== null &&
     activeTab.searchQuery !== null;
+
+  // Determine what URL to show in the address bar
+  const addressBarUrl = activeTab?.searchQuery
+    ? activeTab.searchQuery
+    : (activeTab?.url ?? '');
 
   return (
     <div className="flex flex-col h-screen bg-cheetah-dark overflow-hidden">
@@ -167,7 +190,7 @@ export function BrowserLayout() {
 
           {/* Address Bar */}
           <AddressBar
-            url={activeTab?.url ?? ''}
+            url={addressBarUrl}
             isLoading={activeTab?.isLoading ?? false}
             onNavigate={(input) => navigate(input, activeTabId)}
           />
@@ -198,9 +221,13 @@ export function BrowserLayout() {
       {/* Status Bar */}
       <div className="flex-shrink-0 flex items-center justify-between px-3 py-0.5 bg-cheetah-darker border-t border-cheetah-border/50">
         <div className="flex items-center gap-2">
-          <div className={`w-1.5 h-1.5 rounded-full ${activeTab?.isLoading ? 'bg-cheetah-orange animate-pulse' : 'bg-green-500/60'}`} />
+          <div className={`w-1.5 h-1.5 rounded-full ${activeTab?.isLoading ? 'bg-cheetah-orange animate-pulse' : activeTab?.error ? 'bg-destructive/60' : 'bg-green-500/60'}`} />
           <span className="text-[10px] text-muted-foreground font-mono truncate max-w-xs">
-            {activeTab?.isLoading ? 'Loading...' : activeTab?.url || 'Ready'}
+            {activeTab?.isLoading
+              ? 'Loading...'
+              : activeTab?.error
+              ? 'Error'
+              : activeTab?.url || 'Ready'}
           </span>
         </div>
         <div className="flex items-center gap-3">

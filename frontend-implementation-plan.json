@@ -1,60 +1,68 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add Falcon Cloaking Mode Options (about:blank, https://error, 123456789101112)",
+  "title": "Fix search functionality and website proxy connections",
   "requirements": [
     {
-      "id": "REQ-15",
-      "summary": "Add a cloaking mode selector UI to the Falcon Cloaking feature allowing users to choose between 'about:blank', 'https://error', and '123456789101112' disguise modes, with session-persistent state",
+      "id": "REQ-3",
+      "summary": "Fix the frontend query mutations to correctly call backend methods and handle all response states",
       "acceptanceCriteria": [
-        "A mode selector (e.g., dropdown or segmented control) is visible in the Falcon Cloaking section of the UI, presenting options: 'about:blank', 'https://error', and '123456789101112'.",
-        "Selecting 'about:blank' and triggering the cloak opens the app in a new blank-URL popup/tab with about:blank visible in the browser address bar.",
-        "Selecting 'https://error' and triggering the cloak opens the app in a new popup/tab where the address bar shows https://error.",
-        "Selecting '123456789101112' and triggering the cloak opens the app in a new popup/tab where the address bar shows the numeric string '123456789101112'.",
-        "The selected mode persists in state and is pre-selected the next time the user opens the cloak options.",
-        "The mode selector and cloak trigger are only present in the Falcon Cloaking UI — not in the main browser toolbar or tab bar."
+        "Entering a URL and pressing Enter triggers a proxy request and populates the active tab with content",
+        "Entering a search query and pressing Enter triggers a search request and populates the active tab with search results",
+        "Loading indicators appear in TabBar while requests are in flight",
+        "Error states are shown when requests fail"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/CloakButton.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Replace the single-action cloak button with a compact control that includes a mode selector dropdown/segmented control showing the three cloaking modes ('about:blank', 'https://error', '123456789101112'). Add local state using useState to track the currently selected mode. Display the current mode alongside the falcon emoji button. Style the selector consistently with the existing dark cheetah theme using Tailwind classes and color tokens from the config (dark background, yellow-orange accents). Ensure the cloak button passes the selected mode to the useCloaking hook's cloak function."
+          "description": "Fix the useProxyRequest and useSearchRequest mutations to correctly call the backend actor's proxyRequest and searchRequest methods. Ensure proper error handling for both success and failure cases. Return structured data that includes the response text and any error information. Update mutation callbacks to properly reflect loading, error, and success states that can be consumed by BrowserLayout and useTabManager."
+        },
+        {
+          "path": "frontend/src/components/BrowserLayout.tsx",
+          "operation": "modify",
+          "description": "Fix the integration between AddressBar input handling and the proxy/search mutations from useQueries. Ensure that when a URL is submitted, useProxyRequest is called with the correct endpoint parameter, and when a search query is submitted, useSearchRequest is called with the searchQuery parameter. Update the mutation success handlers to correctly update the active tab state via useTabManager with the returned content or search results. Ensure loading and error states from mutations are properly reflected in the tab state and passed to TabBar."
+        },
+        {
+          "path": "frontend/src/hooks/useTabManager.ts",
+          "operation": "modify",
+          "description": "Ensure the tab state model correctly tracks loading, error, content, and searchResults states for each tab. Add or fix methods to update a tab's state when proxy or search requests complete, fail, or are in progress. Ensure the active tab's loading state is accessible so that TabBar can display loading indicators during requests."
+        },
+        {
+          "path": "frontend/src/components/TabBar.tsx",
+          "operation": "modify",
+          "description": "Fix the rendering logic to correctly display loading indicators on the active tab when a proxy or search request is in flight. Ensure the loading state is read from the active tab's state (managed by useTabManager) and that the indicator is visible and correctly styled."
+        },
+        {
+          "path": "frontend/src/components/ProxyContent.tsx",
+          "operation": "modify",
+          "description": "Ensure ProxyContent correctly receives and displays the proxied content from the tab state. Fix the iframe rendering to handle the response body returned by the backend proxyRequest method. Ensure loading and error states are properly displayed when the tab is in those states. Verify that the link and form interceptors correctly trigger navigation through the proxy mutation when internal links are clicked."
         }
       ]
     },
     {
-      "id": "REQ-16",
-      "summary": "Update useCloaking.ts to accept a cloakMode parameter and implement URL disguise techniques for 'about:blank', 'https://error', and '123456789101112' modes using History API or popup techniques",
+      "id": "REQ-4",
+      "summary": "Enable navigation from search results to proxied websites in the same tab",
       "acceptanceCriteria": [
-        "useCloaking.ts exports a cloak function that accepts a mode argument.",
-        "When mode is 'about:blank', the cloaked window/tab shows about:blank in the browser address bar.",
-        "When mode is 'https://error', the cloaked window/tab shows https://error in the browser address bar.",
-        "When mode is '123456789101112', the cloaked window/tab shows 123456789101112 in the browser address bar.",
-        "In all three modes, the full Cheetah app content renders inside the cloaked window."
+        "Clicking a search result URL navigates to the proxied version of that site in the active tab",
+        "The address bar updates to reflect the navigated URL",
+        "The tab transitions from showing search results to showing proxied web content"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useCloaking.ts",
+          "path": "frontend/src/components/SearchResults.tsx",
           "operation": "modify",
-          "description": "Modify the cloak function signature to accept a cloakMode parameter of type 'about:blank' | 'https://error' | '123456789101112'. For 'about:blank', use the existing blank popup approach. For 'https://error', open the popup window and use window.history.pushState or replaceState to set the visible URL to 'https://error' in the address bar. For '123456789101112', open the popup window and use the History API to set the visible URL to the numeric string '123456789101112'. Ensure that in all three modes, the full Cheetah app content is rendered inside the cloaked window via the full-screen iframe technique."
-        }
-      ]
-    },
-    {
-      "id": "REQ-17",
-      "summary": "Integrate the mode selector UI into CloakButton.tsx, ensuring the cloak action triggers using the currently selected mode and styling matches the dark cheetah theme",
-      "acceptanceCriteria": [
-        "CloakButton.tsx renders a mode selector alongside the falcon cloak trigger button.",
-        "The mode selector displays the three options: 'about:blank', 'https://error', '123456789101112'.",
-        "Clicking the cloak button triggers the selected mode via the updated useCloaking hook.",
-        "The component is styled using the existing dark/yellow-orange cheetah color tokens from Tailwind config.",
-        "No other toolbar components are modified."
-      ],
-      "file_operations": [
+          "description": "Fix the click handler for search result items to call the onNavigate callback with the result's URL. Ensure the URL is passed correctly so that BrowserLayout can trigger a proxy request for that URL in the active tab."
+        },
         {
-          "path": "frontend/src/components/CloakButton.tsx",
+          "path": "frontend/src/components/BrowserLayout.tsx",
           "operation": "modify",
-          "description": "Augment CloakButton.tsx to render a compact mode selector UI (e.g., a dropdown select or segmented button group) positioned alongside the existing falcon cloak button. Use useState to manage the selected mode state ('about:blank' | 'https://error' | '123456789101112') with 'about:blank' as the default. Render the three mode options in the selector. When the cloak button is clicked, pass the current selected mode to the useCloaking cloak function. Apply Tailwind classes using the dark background and yellow-orange accent tokens from frontend/tailwind.config.js to ensure consistency with the existing Cheetah theme. Ensure the tooltip and button behavior remain intact and no other toolbar components are affected."
+          "description": "Ensure the onNavigate callback passed to SearchResults triggers a proxy request via useProxyRequest for the clicked URL. Update the active tab's URL and clear the search results state so that the tab transitions to showing proxied content. Ensure the address bar is updated to reflect the new URL."
+        },
+        {
+          "path": "frontend/src/components/AddressBar.tsx",
+          "operation": "modify",
+          "description": "Ensure the address bar value is synchronized with the active tab's URL. When the tab's URL changes (e.g., after clicking a search result), the address bar should update to display the new URL. This may require lifting state or passing the current URL as a controlled prop from BrowserLayout."
         }
       ]
     }

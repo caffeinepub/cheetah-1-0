@@ -6,9 +6,13 @@ export function useProxyRequest() {
   const { actor } = useActor();
 
   return useMutation({
-    mutationFn: async (url: string) => {
-      if (!actor) throw new Error('Actor not initialized');
-      return actor.proxyRequest(url);
+    mutationFn: async (url: string): Promise<string> => {
+      if (!actor) throw new Error('Actor not initialized. Please wait and try again.');
+      const result = await actor.proxyRequest(url);
+      if (!result || result.trim() === '') {
+        throw new Error('Empty response from server');
+      }
+      return result;
     },
   });
 }
@@ -23,6 +27,7 @@ export interface GoogleSearchResponse {
   error?: {
     code: number;
     message: string;
+    errors?: Array<{ message: string; domain: string; reason: string }>;
   };
 }
 
@@ -31,28 +36,38 @@ export function useSearchRequest() {
 
   return useMutation({
     mutationFn: async (query: string): Promise<GoogleSearchResponse> => {
-      if (!actor) throw new Error('Actor not initialized');
+      if (!actor) throw new Error('Actor not initialized. Please wait and try again.');
       const raw = await actor.searchRequest(query);
+
+      let parsed: GoogleSearchResponse;
       try {
-        const parsed = JSON.parse(raw) as GoogleSearchResponse;
-        if (parsed.error) {
-          throw new Error(parsed.error.message || 'Search API error');
-        }
+        parsed = JSON.parse(raw) as GoogleSearchResponse;
+      } catch {
+        throw new Error('Failed to parse search results. Please try again.');
+      }
+
+      if (parsed.error) {
+        const msg = parsed.error.message || 'Search API error';
+        throw new Error(`Search error (${parsed.error.code}): ${msg}`);
+      }
+
+      if (!parsed.items || parsed.items.length === 0) {
+        // Return empty results rather than throwing
         return {
-          items: (parsed.items || []).map(item => ({
-            title: item.title || '',
-            link: item.link || '',
-            snippet: item.snippet || '',
-            displayLink: item.displayLink || '',
-          })),
+          items: [],
           searchInformation: parsed.searchInformation,
         };
-      } catch (e) {
-        if (e instanceof SyntaxError) {
-          throw new Error('Failed to parse search results');
-        }
-        throw e;
       }
+
+      return {
+        items: parsed.items.map(item => ({
+          title: item.title || '',
+          link: item.link || '',
+          snippet: item.snippet || '',
+          displayLink: item.displayLink || '',
+        })),
+        searchInformation: parsed.searchInformation,
+      };
     },
   });
 }

@@ -2,12 +2,11 @@ import OutCall "http-outcalls/outcall";
 import Text "mo:core/Text";
 import Array "mo:core/Array";
 
-
-
 actor {
   let googleSearchEngineId = "a566dfe30b89f4713";
   let googleSearchApiBaseUrl = "https://www.googleapis.com/customsearch/v1";
 
+  // Transform callback for HTTP Outcalls
   public query func transform(input : OutCall.TransformationInput) : async OutCall.TransformationOutput {
     // Apply secure and neutral headers
     let originalOutput = OutCall.transform(input);
@@ -19,7 +18,7 @@ actor {
       }
     );
 
-    // Create a new output record with the updated headers
+    // Add Content-Security-Policy header and return new output
     {
       originalOutput with
       headers = filteredHeaders.concat([{
@@ -29,6 +28,7 @@ actor {
     };
   };
 
+  // Enforce HTTPS scheme for all URLs
   func enforceHttpsScheme(url : Text) : Text {
     let lowerUrl = url.toLower();
     if (lowerUrl.contains(#text "://")) {
@@ -43,11 +43,13 @@ actor {
     };
   };
 
+  // Proxy endpoint for fetching external resources securely
   public shared ({ caller }) func proxyRequest(endpoint : Text) : async Text {
     let secureEndpoint = enforceHttpsScheme(endpoint);
     await OutCall.httpGetRequest(secureEndpoint, [], transform);
   };
 
+  // Google Custom Search API integration
   public shared ({ caller }) func searchRequest(searchQuery : Text) : async Text {
     let googleSearchURL = googleSearchApiBaseUrl # "?q=" # searchQuery # "&cx=" # googleSearchEngineId;
     await OutCall.httpGetRequest(googleSearchURL, [], transform);

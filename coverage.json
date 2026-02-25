@@ -1,57 +1,76 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-25T23:38:42.723Z",
+  "generatedAt": "2026-02-25T23:56:18.512Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 4,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-15",
-        "summary": "Add a cloaking mode selector to the Falcon Cloaking feature in the frontend. The user must be able to choose from three disguise modes before or when triggering the cloak: (1) 'about:blank' — opens the app in a popup/tab that shows about:blank in the address bar; (2) 'https://error' — opens the app disguised under an https://error URL appearance; (3) '123456789101112' — opens the app disguised under a numeric string URL appearance. Persist the selected mode in component state so it is remembered across cloak triggers within the session.",
+        "id": "REQ-1",
+        "summary": "Fix the Google Custom Search API integration in the backend so that search queries return real, populated results. Ensure the HTTP outcall to the Google Custom Search API is correctly constructed with the API key and Search Engine ID, and that the response is properly parsed and returned to the frontend.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Fix the proxy backend endpoint so that HTTP GET requests to external websites succeed. Ensure HTTPS enforcement, proper header forwarding, and that the response body is returned intact to the frontend iframe. Debug and resolve any issues causing proxied sites to fail to load.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Fix the frontend `useProxyRequest` and `useSearchRequest` mutations in useQueries.ts so they correctly call the backend actor methods and handle both success and error responses. Ensure loading, error, and success states are properly reflected in BrowserLayout and the tab state via useTabManager.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/CloakButton.tsx"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/BrowserLayout.tsx",
+          "frontend/src/hooks/useTabManager.ts",
+          "frontend/src/components/TabBar.tsx",
+          "frontend/src/components/ProxyContent.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/CloakButton.tsx"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/BrowserLayout.tsx",
+          "frontend/src/hooks/useTabManager.ts",
+          "frontend/src/components/ProxyContent.tsx"
         ]
       },
       {
-        "id": "REQ-16",
-        "summary": "Update useCloaking.ts to accept a cloakMode parameter ('about:blank' | 'https://error' | '123456789101112') and apply the appropriate URL disguise technique for each mode. For 'about:blank', use the existing blank popup approach. For 'https://error', open the popup/window and push or replace the history state to display 'https://error' as the visible URL. For '123456789101112', open the popup/window and set the visible URL to the numeric string '123456789101112' using the History API or equivalent popup technique.",
+        "id": "REQ-4",
+        "summary": "Ensure that clicking a search result in SearchResults.tsx triggers navigation to that URL through the proxy, loading the linked website in the same tab via the ProxyContent iframe.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useCloaking.ts"
+          "frontend/src/components/SearchResults.tsx",
+          "frontend/src/components/BrowserLayout.tsx",
+          "frontend/src/components/AddressBar.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useCloaking.ts"
-        ]
-      },
-      {
-        "id": "REQ-17",
-        "summary": "Update CloakButton.tsx to integrate the new mode selector UI. Replace or augment the existing single-action cloak button with a compact control that shows the current selected mode and allows switching between the three modes ('about:blank', 'https://error', '123456789101112'). The cloak action button should trigger the cloak using the currently selected mode. Style the selector consistently with the existing dark cheetah theme (dark background, yellow-orange accents).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/CloakButton.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/CloakButton.tsx"
+          "frontend/src/components/SearchResults.tsx",
+          "frontend/src/components/BrowserLayout.tsx",
+          "frontend/src/components/AddressBar.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/CloakButton.tsx",
-    "frontend/src/hooks/useCloaking.ts",
+    "frontend/src/components/AddressBar.tsx",
+    "frontend/src/components/BrowserLayout.tsx",
+    "frontend/src/components/ProxyContent.tsx",
+    "frontend/src/components/SearchResults.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useTabManager.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

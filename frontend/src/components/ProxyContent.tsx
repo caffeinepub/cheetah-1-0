@@ -6,6 +6,33 @@ interface ProxyContentProps {
   onNavigate: (url: string) => void;
 }
 
+/**
+ * Injects a <base> tag into HTML so relative URLs resolve against the original site.
+ * Also rewrites <meta http-equiv="Content-Security-Policy"> to avoid blocking.
+ */
+function injectBaseTag(html: string, baseUrl: string): string {
+  // Remove any existing CSP meta tags that would block resources
+  let processed = html.replace(
+    /<meta[^>]+http-equiv=["']Content-Security-Policy["'][^>]*>/gi,
+    ''
+  );
+
+  // Remove existing base tags
+  processed = processed.replace(/<base[^>]*>/gi, '');
+
+  // Inject base tag right after <head> or at the start of <html>
+  const baseTag = `<base href="${baseUrl}" target="_self">`;
+  if (/<head[^>]*>/i.test(processed)) {
+    processed = processed.replace(/(<head[^>]*>)/i, `$1${baseTag}`);
+  } else if (/<html[^>]*>/i.test(processed)) {
+    processed = processed.replace(/(<html[^>]*>)/i, `$1<head>${baseTag}</head>`);
+  } else {
+    processed = baseTag + processed;
+  }
+
+  return processed;
+}
+
 export function ProxyContent({ tab, onNavigate }: ProxyContentProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -73,17 +100,22 @@ export function ProxyContent({ tab, onNavigate }: ProxyContentProps) {
     const doc = iframe.contentDocument || iframe.contentWindow?.document;
     if (!doc) return;
 
+    // Inject base tag so relative URLs resolve correctly
+    const processedContent = tab.url && tab.url.startsWith('http')
+      ? injectBaseTag(tab.content, tab.url)
+      : tab.content;
+
     doc.open();
-    doc.write(tab.content);
+    doc.write(processedContent);
     doc.close();
 
     // Wait for content to load then intercept links
     const timer = setTimeout(() => {
       injectLinkInterceptor();
-    }, 100);
+    }, 150);
 
     return () => clearTimeout(timer);
-  }, [tab.content, injectLinkInterceptor]);
+  }, [tab.content, tab.url, injectLinkInterceptor]);
 
   if (tab.isLoading) {
     return (
@@ -94,7 +126,7 @@ export function ProxyContent({ tab, onNavigate }: ProxyContentProps) {
             <div className="absolute inset-0 border-2 border-transparent border-t-cheetah-orange rounded-full animate-spin" />
           </div>
           <div className="text-sm text-muted-foreground font-mono">
-            {tab.url ? `Loading ${tab.url}` : 'Loading...'}
+            {tab.url && tab.url.startsWith('http') ? `Connecting to ${tab.url}` : 'Loading...'}
           </div>
         </div>
       </div>
@@ -115,6 +147,12 @@ export function ProxyContent({ tab, onNavigate }: ProxyContentProps) {
           <div className="bg-cheetah-darker rounded p-3 text-xs text-destructive font-mono">
             {tab.error}
           </div>
+          <button
+            onClick={() => onNavigate(tab.url)}
+            className="mt-4 w-full py-2 text-xs bg-cheetah-surface2 hover:bg-cheetah-surface border border-cheetah-border rounded text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
@@ -132,7 +170,8 @@ export function ProxyContent({ tab, onNavigate }: ProxyContentProps) {
     <iframe
       ref={iframeRef}
       className="flex-1 w-full border-none bg-white"
-      sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
+      sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+      style={{ height: '100%' }}
     />
   );
 }
@@ -163,20 +202,20 @@ function NewTabPage({ onNavigate }: { onNavigate: (url: string) => void }) {
         <div className="flex flex-col items-center gap-3">
           <img
             src="/assets/generated/cheetah-logo.dim_128x128.png"
-            alt="Cheetah 1.0"
+            alt="Cheetah"
             className="w-16 h-16 object-contain"
             onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
           />
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-cheetah-orange tracking-tight">Cheetah 1.0</h1>
+            <h1 className="text-2xl font-bold text-cheetah-orange tracking-tight">Cheetah</h1>
             <p className="text-xs text-muted-foreground mt-1">Fast. Private. Yours.</p>
           </div>
         </div>
 
         {/* Search Bar */}
         <form onSubmit={handleSearch} className="w-full">
-          <div className="flex items-center gap-2 bg-cheetah-surface border border-cheetah-border rounded-lg px-4 py-3 focus-within:border-cheetah-orange/60 focus-within:address-bar-focus transition-all">
-            <span className="text-muted-foreground">🔍</span>
+          <div className="flex items-center gap-2 bg-cheetah-surface border border-cheetah-border rounded-lg px-4 py-3 focus-within:border-cheetah-orange/60 transition-all">
+            <span className="text-muted-foreground text-sm">🔍</span>
             <input
               type="text"
               value={searchInput}
@@ -187,7 +226,8 @@ function NewTabPage({ onNavigate }: { onNavigate: (url: string) => void }) {
             />
             <button
               type="submit"
-              className="px-3 py-1 bg-cheetah-orange text-cheetah-darker text-xs font-semibold rounded hover:bg-cheetah-yellow transition-colors"
+              disabled={!searchInput.trim()}
+              className="px-3 py-1 text-xs bg-cheetah-orange text-cheetah-darker rounded font-semibold hover:bg-cheetah-yellow transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Go
             </button>
@@ -196,16 +236,16 @@ function NewTabPage({ onNavigate }: { onNavigate: (url: string) => void }) {
 
         {/* Quick Links */}
         <div className="w-full">
-          <p className="text-xs text-muted-foreground mb-3 text-center uppercase tracking-wider">Quick Access</p>
-          <div className="grid grid-cols-3 gap-2">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-3 text-center font-mono">Quick Access</p>
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
             {quickLinks.map(link => (
               <button
                 key={link.url}
                 onClick={() => onNavigate(link.url)}
-                className="flex items-center gap-2 px-3 py-2.5 bg-cheetah-surface border border-cheetah-border rounded hover:border-cheetah-orange/50 hover:bg-cheetah-surface2 transition-all text-left group"
+                className="flex flex-col items-center gap-1.5 p-3 rounded-lg bg-cheetah-surface border border-cheetah-border hover:border-cheetah-orange/40 hover:bg-cheetah-surface2 transition-all group"
               >
-                <span className="text-base">{link.icon}</span>
-                <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">{link.label}</span>
+                <span className="text-xl">{link.icon}</span>
+                <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors font-mono">{link.label}</span>
               </button>
             ))}
           </div>

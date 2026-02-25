@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
-import { Search, Globe, ArrowRight, RotateCcw, X } from 'lucide-react';
+import { Search, Globe, ArrowRight, X } from 'lucide-react';
 
 interface AddressBarProps {
   url: string;
@@ -11,7 +11,6 @@ interface AddressBarProps {
 function isUrl(input: string): boolean {
   const trimmed = input.trim();
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return true;
-  // domain-like pattern
   const domainPattern = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+/;
   return domainPattern.test(trimmed) && !trimmed.includes(' ');
 }
@@ -21,19 +20,24 @@ export function AddressBar({ url, isLoading, onNavigate, onStop }: AddressBarPro
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Sync with external URL changes when not focused
   useEffect(() => {
     if (!isFocused) {
       setInputValue(url);
     }
   }, [url, isFocused]);
 
+  const handleSubmit = () => {
+    const val = inputValue.trim();
+    if (!val) return;
+    onNavigate(val);
+    inputRef.current?.blur();
+  };
+
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      const val = inputValue.trim();
-      if (!val) return;
-      onNavigate(val);
-      inputRef.current?.blur();
+      handleSubmit();
     }
     if (e.key === 'Escape') {
       setInputValue(url);
@@ -48,6 +52,7 @@ export function AddressBar({ url, isLoading, onNavigate, onStop }: AddressBarPro
 
   const handleBlur = () => {
     setIsFocused(false);
+    // Reset to the current URL (not the search: prefix version)
     setInputValue(url);
   };
 
@@ -93,6 +98,7 @@ export function AddressBar({ url, isLoading, onNavigate, onStop }: AddressBarPro
         <button
           onMouseDown={e => { e.preventDefault(); setInputValue(''); }}
           className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+          tabIndex={-1}
         >
           <X size={12} />
         </button>
@@ -102,19 +108,20 @@ export function AddressBar({ url, isLoading, onNavigate, onStop }: AddressBarPro
         <button
           onMouseDown={e => {
             e.preventDefault();
-            const val = inputValue.trim();
-            if (val) onNavigate(val);
+            handleSubmit();
           }}
           className="flex-shrink-0 text-cheetah-orange hover:text-cheetah-yellow transition-colors"
+          tabIndex={-1}
         >
           <ArrowRight size={13} />
         </button>
       )}
 
-      {isLoading && !isFocused && (
+      {isLoading && !isFocused && onStop && (
         <button
           onClick={onStop}
           className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+          tabIndex={-1}
         >
           <X size={12} />
         </button>

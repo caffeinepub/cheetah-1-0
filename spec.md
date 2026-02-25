@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Add a cloaking mode selector to the Falcon Cloaking feature, allowing users to choose from three URL disguise modes: `about:blank`, `https://error`, and `123456789101112`.
+**Goal:** Fix the search functionality and website proxy connections in the Cheetah Browser so that real search results are returned and external websites load correctly through the proxy.
 
 **Planned changes:**
-- Add a mode selector UI (dropdown or segmented control) to `CloakButton.tsx` presenting the three cloak mode options, styled with the existing dark/yellow-orange Cheetah theme
-- Update `useCloaking.ts` to accept a `cloakMode` parameter and apply the appropriate URL disguise technique for each mode using popup windows and the History API
-- Persist the selected cloak mode in component state so it is remembered across cloak triggers within the session
-- Restrict the mode selector and cloak trigger to the Falcon Cloaking UI only — no changes to other toolbar or tab components
+- Fix the Google Custom Search API integration in the backend to correctly construct HTTP outcalls with the API key and Search Engine ID, and properly parse and return results to the frontend
+- Fix the proxy backend endpoint to correctly forward HTTPS requests to external websites and return the response body intact to the frontend iframe
+- Fix the `useProxyRequest` and `useSearchRequest` mutations in the frontend to correctly call backend actor methods and handle loading, error, and success states in BrowserLayout and tab state
+- Ensure clicking a search result in SearchResults navigates to the proxied version of that URL in the active tab, updating the address bar and transitioning from search results to proxied content
 
-**User-visible outcome:** In the Falcon Cloaking section, users can select one of three disguise modes before triggering the cloak. The cloaked window will display the chosen URL (`about:blank`, `https://error`, or `123456789101112`) in the browser address bar while rendering the full Cheetah app inside.
+**User-visible outcome:** Users can enter a search query or URL in the address bar and receive real search results or a loaded proxied website, with loading indicators during requests and error messages on failure. Clicking a search result navigates to that site through the proxy.
