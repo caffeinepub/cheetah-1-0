@@ -1,0 +1,61 @@
+{
+  "kind": "build_request",
+  "title": "Integrate Google Custom Search Engine (ID: a566dfe30b89f4713)",
+  "projectName": "Cheetah 1.0",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-9",
+      "text": "Update the backend search endpoint in backend/main.mo to use the Google Custom Search JSON API with the provided Search Engine ID (a566dfe30b89f4713) instead of DuckDuckGo. The endpoint should construct requests to 'https://www.googleapis.com/customsearch/v1' with the query parameter 'q', the 'cx' parameter set to 'a566dfe30b89f4713', and return the parsed search results to the frontend.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "use this google search engine id for search to work better a566dfe30b89f4713"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The backend search endpoint uses the Google Custom Search API URL (https://www.googleapis.com/customsearch/v1) for outgoing search HTTP outcalls.",
+        "The 'cx' parameter is set to 'a566dfe30b89f4713' in all search requests.",
+        "Search queries typed in the address bar are forwarded to Google Custom Search and results are returned to the frontend.",
+        "The DuckDuckGo search path is replaced or overridden by the Google Custom Search integration."
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Update the frontend search result handling in useQueries.ts and any search result rendering components to correctly parse and display results returned from the Google Custom Search API response format (items array with title, link, snippet fields), replacing any prior DuckDuckGo-specific result parsing.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "use this google search engine id for search to work better a566dfe30b89f4713"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Search results rendered in the app reflect the Google Custom Search API response structure (title, link, snippet).",
+        "Each search result displays a clickable title, a URL, and a description/snippet.",
+        "No DuckDuckGo-specific result fields or parsing logic remain active in the frontend search flow.",
+        "Results are styled consistently with the existing Cheetah dark theme."
+      ]
+    }
+  ],
+  "constraints": [
+    "Google Custom Search Engine ID must be exactly 'a566dfe30b89f4713' — do not alter or placeholder this value.",
+    "Do not modify any files listed under frontend.immutablePaths.",
+    "Keep all backend logic within the single actor in backend/main.mo."
+  ],
+  "nonGoals": [
+    "Adding a new API key input UI for users to configure their own search engine.",
+    "Supporting multiple search providers simultaneously.",
+    "Storing search history in the backend.",
+    "Changing any tab, cloaking, proxy, or URL normalization behavior."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

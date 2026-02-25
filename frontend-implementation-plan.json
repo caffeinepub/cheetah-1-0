@@ -1,0 +1,39 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Integrate Google Custom Search Engine (ID: a566dfe30b89f4713)",
+  "requirements": [
+    {
+      "id": "REQ-10",
+      "summary": "Update frontend search result handling to parse and display Google Custom Search API responses (items array with title, link, snippet) in useQueries.ts and search result rendering components, replacing DuckDuckGo-specific parsing",
+      "acceptanceCriteria": [
+        "Search results rendered in the app reflect the Google Custom Search API response structure (title, link, snippet).",
+        "Each search result displays a clickable title, a URL, and a description/snippet.",
+        "No DuckDuckGo-specific result fields or parsing logic remain active in the frontend search flow.",
+        "Results are styled consistently with the existing Cheetah dark theme."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Update the useSearchRequest mutation hook to expect and handle Google Custom Search API response format (JSON with items array containing title, link, snippet fields). Parse the returned JSON string from the backend and extract the items array. Remove any DuckDuckGo-specific result parsing logic."
+        },
+        {
+          "path": "frontend/src/components/SearchResults.tsx",
+          "operation": "create",
+          "description": "Create a new SearchResults component that receives Google Custom Search API result items (title, link, snippet) and renders them in a list format consistent with the Cheetah dark theme. Each result should display a clickable title linking to the URL, the link itself, and the snippet description. Style using Tailwind classes and existing theme variables from index.css."
+        },
+        {
+          "path": "frontend/src/components/BrowserLayout.tsx",
+          "operation": "modify",
+          "description": "Wire the new SearchResults component into BrowserLayout. When a search query is detected (non-URL input in AddressBar), trigger the useSearchRequest mutation and conditionally render SearchResults instead of ProxyContent when search results are available. Ensure search results display within the active tab context."
+        },
+        {
+          "path": "frontend/src/components/AddressBar.tsx",
+          "operation": "modify",
+          "description": "Review AddressBar to ensure search queries (non-URL inputs) are correctly identified and passed to the parent BrowserLayout for search execution. Verify that the component correctly distinguishes between URL navigation and search intent."
+        }
+      ]
+    }
+  ]
+}

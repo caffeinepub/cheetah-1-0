@@ -1,0 +1,162 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 7,
+  "summary": "Cheetah 1.0 — a web proxy app with a built-in search engine, about:blank cloaking (falcon cloaking), and an internal tab system that restricts navigation to user-typed URLs only. Built as a server-side web framework using Swift, SwiftNIO, Swift Package Manager, and Fluent ORM for backend APIs and web applications.",
+  "architectural_notes": [
+    "Built with Swift using SwiftNIO for asynchronous server-side programming",
+    "Uses Swift Package Manager for dependency management",
+    "Uses Fluent ORM for database interactions",
+    "About:blank cloaking hides the app in a blank-looking browser tab",
+    "Google Custom Search Engine ID: a566dfe30b89f4713 used for search queries"
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-implement-a-built-in-search-engine-feature-when-the-user-types-a-search-query-non-url-text-into-the-address-bar-route-the-query-through-a-search-provider-e-g-duckduckgo-via-proxy-and-display-results-within-the-app",
+      "title": "Implement a built-in search engine feature: when the user types a search query (non-URL text) into the address bar, route the query through a search provider (e.g., DuckDuckGo via proxy) and display results within the app.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-an-about-blank-cloaking-feature-referred-to-as-falcon-cloaking-provide-a-button-or-hotkey-that-opens-the-cheetah-1-0-app-inside-a-new-browser-tab-window-that-displays-about-blank-in-the-address-bar-disguising-the-app-s-true-url",
+      "title": "Implement an About:Blank cloaking feature (referred to as 'falcon cloaking'): provide a button or hotkey that opens the Cheetah 1.0 app inside a new browser tab/window that displays 'about:blank' in the address bar, disguising the app's true URL.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-an-internal-tab-system-within-the-cheetah-1-0-single-page-app-each-tab-maintains-its-own-url-history-and-displays-proxied-content-new-tabs-can-only-navigate-to-urls-that-the-user-manually-types-into-the-address-bar-within-the-app-no-external-link-clicks-that-escape-the-proxy",
+      "title": "Implement an internal tab system within the Cheetah 1.0 single-page app. Each tab maintains its own URL history and displays proxied content. New tabs can only navigate to URLs that the user manually types into the address bar within the app — no external link clicks that escape the proxy.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-design-a-sleek-fast-feeling-dark-browser-style-visual-theme-for-cheetah-1-0-use-a-dark-charcoal-black-background-with-vibrant-yellow-orange-cheetah-inspired-accent-colors-sharp-typography-and-a-minimal-toolbar-layout-reminiscent-of-a-modern-browser-ui-apply-the-theme-consistently-across-all-components-tab-bar-address-bar-search-results-and-proxied-content-frame",
+      "title": "Design a sleek, fast-feeling dark browser-style visual theme for Cheetah 1.0. Use a dark charcoal/black background with vibrant yellow-orange (cheetah-inspired) accent colors, sharp typography, and a minimal toolbar layout reminiscent of a modern browser UI. Apply the theme consistently across all components: tab bar, address bar, search results, and proxied content frame.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-the-frontend-address-bar-and-navigation-logic-addressbar-tsx-browserlayout-tsx-normalize-any-url-the-user-types-before-sending-it-to-the-proxy-if-the-input-starts-with-http-rewrite-it-to-https-if-it-has-no-scheme-and-looks-like-a-url-contains-a-dot-and-no-spaces-prepend-https-display-the-normalized-https-url-in-the-address-bar-after-navigation",
+      "title": "In the frontend address bar and navigation logic (AddressBar.tsx, BrowserLayout.tsx), normalize any URL the user types before sending it to the proxy: if the input starts with http://, rewrite it to https://; if it has no scheme and looks like a URL (contains a dot and no spaces), prepend https://. Display the normalized https:// URL in the address bar after navigation.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-frontend-search-result-handling-in-usequeries-ts-and-any-search-result-rendering-components-to-correctly-parse-and-display-results-returned-from-the-google-custom-search-api-response-format-items-array-with-title-link-snippet-fields-replacing-any-prior-duckduckgo-specific-result-parsing",
+      "title": "Update the frontend search result handling in useQueries.ts and any search result rendering components to correctly parse and display results returned from the Google Custom Search API response format (items array with title, link, snippet fields), replacing any prior DuckDuckGo-specific result parsing.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Web proxy functionality that routes requests through the server",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Built-in search engine that works within the proxy",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "About:blank cloaking (falcon/falcion cloaking) to disguise the app",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Internal tab system that only opens URLs typed within the site",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Swift server-side framework using SwiftNIO for async programming",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Swift Package Manager integration",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Fluent ORM for database interactions",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Backend API and web application support",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Create a backend proxy endpoint that accepts a target URL, fetches the page server-side, rewrites relative links to route through the proxy, and returns the proxied HTML content to the frontend. This allows the app to load external websites through the server without the browser navigating away.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Store browsing history and saved/bookmarked URLs per tab session in the backend so users can revisit previously entered URLs. Expose backend query and mutation endpoints to read and write URL history entries.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Ensure all proxied websites are served over HTTPS (force secure connections for all proxied URLs)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "In the backend proxy endpoint, before fetching any target URL, enforce HTTPS by upgrading any http:// scheme to https://. If a URL is provided without a scheme, prepend https://. Reject or upgrade insecure http:// requests so that all outbound proxy fetches are made over HTTPS only.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Integrate Google Custom Search Engine (ID: a566dfe30b89f4713) to power the built-in search functionality",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Update the backend search endpoint in backend/main.mo to use the Google Custom Search JSON API with the provided Search Engine ID (a566dfe30b89f4713) instead of DuckDuckGo. The endpoint should construct requests to 'https://www.googleapis.com/customsearch/v1' with the query parameter 'q', the 'cx' parameter set to 'a566dfe30b89f4713', and return the parsed search results to the frontend.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Cheetah 1.0",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

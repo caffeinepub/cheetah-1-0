@@ -1,0 +1,26 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-update-the-frontend-search-result-handling-in-usequeries-ts-and-any-search-result-rendering-components-to-correctly-parse-and-display-results-returned-from-the-google-custom-search-api-response-format-items-array-with-title-link-snippet-fields-replacing-any-prior-duckduckgo-specific-result-parsing",
+      "featureTitle": "Update the frontend search result handling in useQueries.ts and any search result rendering components to correctly parse and display results returned from the Google Custom Search API response format (items array with title, link, snippet fields), replacing any prior DuckDuckGo-specific result parsing.",
+      "files": [
+        "frontend/src/components/BrowserLayout.tsx",
+        "frontend/src/components/SearchResults.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

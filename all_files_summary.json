@@ -1,0 +1,23 @@
+{
+  "backend/main.mo": "Motoko actor that exposes HTTP proxy and Google Custom Search API request functions using HTTPS-enforced outbound HTTP calls, plus a transform function for response canonicalization.",
+  "feature_evidence.json": "Feature evidence report mapping the Google Custom Search API frontend integration feature to its relevant source files, components, and test IDs.",
+  "frontend-file-summaries.txt": "JSON document containing one-sentence summaries of each frontend source file, describing the Cheetah browser app's hooks, components, and styles.",
+  "frontend/index.css": "Tailwind base stylesheet defining OKLCH-based CSS custom property tokens for light and dark themes used throughout the Cheetah UI.",
+  "frontend/index.html": "Minimal HTML entry point titled 'Cheetah 1.0' that mounts the React app via a root div and module script.",
+  "frontend/src/App.tsx": "Root React component that renders BrowserLayout alongside a dark-themed Sonner toast notification provider.",
+  "frontend/src/components/AddressBar.tsx": "Address bar component that distinguishes URL vs. search query input, handles keyboard navigation, and shows contextual icons and clear/submit buttons while focused.",
+  "frontend/src/components/BrowserLayout.tsx": "Main browser chrome component that orchestrates tab management, navigation, proxy requests, and search requests, conditionally rendering SearchResults or ProxyContent based on the active tab's state.",
+  "frontend/src/components/CloakButton.tsx": "Button component with a falcon emoji that triggers the about:blank cloaking feature, wrapped in a tooltip.",
+  "frontend/src/components/ProxyContent.tsx": "Renders proxied HTML in a sandboxed iframe, intercepting link clicks and form submissions to keep navigation within the proxy, with loading and error states.",
+  "frontend/src/components/SearchResults.tsx": "React component that renders Google search results for a given query, including a header with result count, a list of clickable result items, and an empty state view.",
+  "frontend/src/components/TabBar.tsx": "React component rendering a browser-style tab bar with support for switching, closing, and adding tabs, including a loading indicator on active tabs.",
+  "frontend/src/hooks/useActor.ts": "Custom hook that creates and caches an ICP backend actor (authenticated or anonymous) using React Query, invalidating dependent queries when the identity changes.",
+  "frontend/src/hooks/useCloaking.ts": "Custom hook providing a `cloak` function that opens the current app in a new blank window wrapped in a full-screen iframe to obscure its origin.",
+  "frontend/src/hooks/useInternetIdentity.ts": "Custom hook and context provider for Internet Identity authentication, exposing login/logout functions, identity state, and login status via a React context.",
+  "frontend/src/hooks/useQueries.ts": "Custom hooks wrapping React Query mutations for proxying HTTP requests and performing Google searches through the ICP backend actor.",
+  "frontend/src/hooks/useTabManager.ts": "Custom hook managing multi-tab browser state, providing functions to add, close, switch, and update tabs along with the current active tab.",
+  "frontend/src/index.css": "Global CSS file defining the Cheetah dark theme using OKLCH CSS variables, Tailwind base/utilities imports, custom scrollbar styles, and glow utility classes.",
+  "frontend/src/main.tsx": "Application entry point that mounts the React app with QueryClientProvider and InternetIdentityProvider wrappers.",
+  "frontend/tailwind.config.js": "Tailwind CSS configuration extending the theme with Cheetah brand colors (OKLCH), custom fonts, animations, and box shadows, with typography, container-queries, and animate plugins.",
+  "project_state.json": "Tracks the overall state of the Cheetah 1.0 project, including version, architectural notes, known issues, and a registry of existing and planned features with their requirement IDs. Serves as the central source of truth for build planning and feature tracking."
+}
