@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 7,
+  "projectStateVersion": 11,
   "summary": "Cheetah 1.0 — a web proxy app with a built-in search engine, about:blank cloaking (falcon cloaking), and an internal tab system that restricts navigation to user-typed URLs only. Built as a server-side web framework using Swift, SwiftNIO, Swift Package Manager, and Fluent ORM for backend APIs and web applications.",
   "architectural_notes": [
     "Built with Swift using SwiftNIO for asynchronous server-side programming",
@@ -57,6 +57,54 @@
       "title": "Update the frontend search result handling in useQueries.ts and any search result rendering components to correctly parse and display results returned from the Google Custom Search API response format (items array with title, link, snippet fields), replacing any prior DuckDuckGo-specific result parsing.",
       "reqIds": [
         "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-meta-name-description-tag-and-update-the-title-in-frontend-index-html-to-use-a-generic-innocuous-sounding-name-e-g-study-tools-or-research-hub-so-the-page-title-and-meta-description-do-not-reveal-the-proxy-nature-of-the-app-to-content-filtering-scanners",
+      "title": "Add a <meta name='description'> tag and update the <title> in frontend/index.html to use a generic, innocuous-sounding name (e.g., 'Study Tools' or 'Research Hub') so the page title and meta description do not reveal the proxy nature of the app to content filtering scanners.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-index-html-add-a-meta-name-robots-content-noindex-nofollow-tag-and-ensure-no-og-title-og-description-or-og-site-name-open-graph-tags-expose-the-app-s-proxy-purpose-so-web-filtering-classification-services-cannot-easily-categorize-it",
+      "title": "In frontend/index.html, add a <meta name='robots' content='noindex, nofollow'> tag and ensure no og:title, og:description, or og:site_name Open Graph tags expose the app's proxy purpose, so web-filtering classification services cannot easily categorize it.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-components-browserlayout-tsx-and-frontend-src-components-proxycontent-tsx-ensure-the-proxied-iframe-does-not-include-attributes-or-identifiers-e-g-title-proxy-frame-data-proxy-attributes-that-content-filtering-browser-extensions-could-use-to-detect-and-block-the-iframe",
+      "title": "In frontend/src/components/BrowserLayout.tsx and frontend/src/components/ProxyContent.tsx, ensure the proxied iframe does not include attributes or identifiers (e.g., title='proxy-frame', data-proxy attributes) that content-filtering browser extensions could use to detect and block the iframe.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-cloaking-mode-selector-to-the-falcon-cloaking-feature-in-the-frontend-the-user-must-be-able-to-choose-from-three-disguise-modes-before-or-when-triggering-the-cloak-1-about-blank-opens-the-app-in-a-popup-tab-that-shows-about-blank-in-the-address-bar-2-https-error-opens-the-app-disguised-under-an-https-error-url-appearance-3-123456789101112-opens-the-app-disguised-under-a-numeric-string-url-appearance-persist-the-selected-mode-in-component-state-so-it-is-remembered-across-cloak-triggers-within-the-session",
+      "title": "Add a cloaking mode selector to the Falcon Cloaking feature in the frontend. The user must be able to choose from three disguise modes before or when triggering the cloak: (1) 'about:blank' — opens the app in a popup/tab that shows about:blank in the address bar; (2) 'https://error' — opens the app disguised under an https://error URL appearance; (3) '123456789101112' — opens the app disguised under a numeric string URL appearance. Persist the selected mode in component state so it is remembered across cloak triggers within the session.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-usecloaking-ts-to-accept-a-cloakmode-parameter-about-blank-https-error-123456789101112-and-apply-the-appropriate-url-disguise-technique-for-each-mode-for-about-blank-use-the-existing-blank-popup-approach-for-https-error-open-the-popup-window-and-push-or-replace-the-history-state-to-display-https-error-as-the-visible-url-for-123456789101112-open-the-popup-window-and-set-the-visible-url-to-the-numeric-string-123456789101112-using-the-history-api-or-equivalent-popup-technique",
+      "title": "Update useCloaking.ts to accept a cloakMode parameter ('about:blank' | 'https://error' | '123456789101112') and apply the appropriate URL disguise technique for each mode. For 'about:blank', use the existing blank popup approach. For 'https://error', open the popup/window and push or replace the history state to display 'https://error' as the visible URL. For '123456789101112', open the popup/window and set the visible URL to the numeric string '123456789101112' using the History API or equivalent popup technique.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-cloakbutton-tsx-to-integrate-the-new-mode-selector-ui-replace-or-augment-the-existing-single-action-cloak-button-with-a-compact-control-that-shows-the-current-selected-mode-and-allows-switching-between-the-three-modes-about-blank-https-error-123456789101112-the-cloak-action-button-should-trigger-the-cloak-using-the-currently-selected-mode-style-the-selector-consistently-with-the-existing-dark-cheetah-theme-dark-background-yellow-orange-accents",
+      "title": "Update CloakButton.tsx to integrate the new mode selector UI. Replace or augment the existing single-action cloak button with a compact control that shows the current selected mode and allows switching between the three modes ('about:blank', 'https://error', '123456789101112'). The cloak action button should trigger the cloak using the currently selected mode. Style the selector consistently with the existing dark cheetah theme (dark background, yellow-orange accents).",
+      "reqIds": [
+        "REQ-17"
       ],
       "version": 1
     }
@@ -152,6 +200,26 @@
       "reqIds": [
         "REQ-9"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Implement techniques to prevent content filtering tools (e.g., Blocksi, GoGuardian) from blocking the site, such as obfuscating traffic, using innocuous-looking URLs, or other evasion methods.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "In the backend (backend/main.mo), add or update the HTTP response headers returned by the proxy endpoint to include generic, neutral headers (e.g., remove or mask any custom 'X-Cheetah-*' headers) and set a conservative Content-Security-Policy that does not signal proxy behavior. Also ensure the User-Agent used in outbound proxy fetch requests is a standard browser UA string rather than a custom one that could be flagged.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Add cloaking options for Falcon Cloaking: let the user choose from multiple disguise modes — (1) about:blank, (2) https://error, (3) 123456789101112 — and apply the selected cloak to the visible URL as well as the tab appearance.",
+      "reqIds": [],
       "status": "pending"
     }
   ],

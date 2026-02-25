@@ -131,7 +131,7 @@ export function BrowserLayout() {
           <span className="text-xs text-muted-foreground">1.0</span>
           <div className="flex items-center gap-1 ml-1">
             <Shield size={10} className="text-cheetah-orange/60" />
-            <span className="text-[10px] text-muted-foreground">Secure Proxy</span>
+            <span className="text-[10px] text-muted-foreground">Secure</span>
           </div>
         </div>
 
@@ -205,7 +205,7 @@ export function BrowserLayout() {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-[10px] text-muted-foreground">{tabs.length} tab{tabs.length !== 1 ? 's' : ''}</span>
-          <span className="text-[10px] text-cheetah-orange/60 font-mono">Cheetah 1.0</span>
+          <span className="text-[10px] text-cheetah-orange/60 font-mono">v1.0</span>
         </div>
       </div>
     </div>

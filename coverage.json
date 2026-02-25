@@ -1,50 +1,57 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-25T23:03:39.658Z",
+  "generatedAt": "2026-02-25T23:38:42.723Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 1,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-10",
-        "summary": "Update the frontend search result handling in useQueries.ts and any search result rendering components to correctly parse and display results returned from the Google Custom Search API response format (items array with title, link, snippet fields), replacing any prior DuckDuckGo-specific result parsing.",
+        "id": "REQ-15",
+        "summary": "Add a cloaking mode selector to the Falcon Cloaking feature in the frontend. The user must be able to choose from three disguise modes before or when triggering the cloak: (1) 'about:blank' — opens the app in a popup/tab that shows about:blank in the address bar; (2) 'https://error' — opens the app disguised under an https://error URL appearance; (3) '123456789101112' — opens the app disguised under a numeric string URL appearance. Persist the selected mode in component state so it is remembered across cloak triggers within the session.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/SearchResults.tsx",
-          "frontend/src/components/BrowserLayout.tsx",
-          "frontend/src/components/AddressBar.tsx"
+          "frontend/src/components/CloakButton.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/SearchResults.tsx",
-          "frontend/src/components/BrowserLayout.tsx"
+          "frontend/src/components/CloakButton.tsx"
         ]
       },
       {
-        "id": "REQ-9",
-        "summary": "Update the backend search endpoint in backend/main.mo to use the Google Custom Search JSON API with the provided Search Engine ID (a566dfe30b89f4713) instead of DuckDuckGo. The endpoint should construct requests to 'https://www.googleapis.com/customsearch/v1' with the query parameter 'q', the 'cx' parameter set to 'a566dfe30b89f4713', and return the parsed search results to the frontend.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "id": "REQ-16",
+        "summary": "Update useCloaking.ts to accept a cloakMode parameter ('about:blank' | 'https://error' | '123456789101112') and apply the appropriate URL disguise technique for each mode. For 'about:blank', use the existing blank popup approach. For 'https://error', open the popup/window and push or replace the history state to display 'https://error' as the visible URL. For '123456789101112', open the popup/window and set the visible URL to the numeric string '123456789101112' using the History API or equivalent popup technique.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useCloaking.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useCloaking.ts"
+        ]
+      },
+      {
+        "id": "REQ-17",
+        "summary": "Update CloakButton.tsx to integrate the new mode selector UI. Replace or augment the existing single-action cloak button with a compact control that shows the current selected mode and allows switching between the three modes ('about:blank', 'https://error', '123456789101112'). The cloak action button should trigger the cloak using the currently selected mode. Style the selector consistently with the existing dark cheetah theme (dark background, yellow-orange accents).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/CloakButton.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/CloakButton.tsx"
+        ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/BrowserLayout.tsx",
-    "frontend/src/components/SearchResults.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/hooks/useTabManager.ts",
+    "frontend/src/components/CloakButton.tsx",
+    "frontend/src/hooks/useCloaking.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

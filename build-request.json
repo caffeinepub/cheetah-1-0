@@ -1,58 +1,81 @@
 {
   "kind": "build_request",
-  "title": "Integrate Google Custom Search Engine (ID: a566dfe30b89f4713)",
+  "title": "Add Falcon Cloaking Mode Options (about:blank, https://error, 123456789101112)",
   "projectName": "Cheetah 1.0",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-9",
-      "text": "Update the backend search endpoint in backend/main.mo to use the Google Custom Search JSON API with the provided Search Engine ID (a566dfe30b89f4713) instead of DuckDuckGo. The endpoint should construct requests to 'https://www.googleapis.com/customsearch/v1' with the query parameter 'q', the 'cx' parameter set to 'a566dfe30b89f4713', and return the parsed search results to the frontend.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-5"
-        ],
-        "quotes": [
-          "use this google search engine id for search to work better a566dfe30b89f4713"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The backend search endpoint uses the Google Custom Search API URL (https://www.googleapis.com/customsearch/v1) for outgoing search HTTP outcalls.",
-        "The 'cx' parameter is set to 'a566dfe30b89f4713' in all search requests.",
-        "Search queries typed in the address bar are forwarded to Google Custom Search and results are returned to the frontend.",
-        "The DuckDuckGo search path is replaced or overridden by the Google Custom Search integration."
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "text": "Update the frontend search result handling in useQueries.ts and any search result rendering components to correctly parse and display results returned from the Google Custom Search API response format (items array with title, link, snippet fields), replacing any prior DuckDuckGo-specific result parsing.",
+      "id": "REQ-15",
+      "text": "Add a cloaking mode selector to the Falcon Cloaking feature in the frontend. The user must be able to choose from three disguise modes before or when triggering the cloak: (1) 'about:blank' — opens the app in a popup/tab that shows about:blank in the address bar; (2) 'https://error' — opens the app disguised under an https://error URL appearance; (3) '123456789101112' — opens the app disguised under a numeric string URL appearance. Persist the selected mode in component state so it is remembered across cloak triggers within the session.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "msg-recent"
         ],
         "quotes": [
-          "use this google search engine id for search to work better a566dfe30b89f4713"
+          "make a options for the cloaking the cloaking is for the falcon only and you can choose for the falcon 1, about:blank 2, https://error 3, 123456789101112"
         ]
       },
       "acceptanceCriteria": [
-        "Search results rendered in the app reflect the Google Custom Search API response structure (title, link, snippet).",
-        "Each search result displays a clickable title, a URL, and a description/snippet.",
-        "No DuckDuckGo-specific result fields or parsing logic remain active in the frontend search flow.",
-        "Results are styled consistently with the existing Cheetah dark theme."
+        "A mode selector (e.g., dropdown or segmented control) is visible in the Falcon Cloaking section of the UI, presenting options: 'about:blank', 'https://error', and '123456789101112'.",
+        "Selecting 'about:blank' and triggering the cloak opens the app in a new blank-URL popup/tab with about:blank visible in the browser address bar.",
+        "Selecting 'https://error' and triggering the cloak opens the app in a new popup/tab where the address bar shows https://error.",
+        "Selecting '123456789101112' and triggering the cloak opens the app in a new popup/tab where the address bar shows the numeric string '123456789101112'.",
+        "The selected mode persists in state and is pre-selected the next time the user opens the cloak options.",
+        "The mode selector and cloak trigger are only present in the Falcon Cloaking UI — not in the main browser toolbar or tab bar."
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "text": "Update useCloaking.ts to accept a cloakMode parameter ('about:blank' | 'https://error' | '123456789101112') and apply the appropriate URL disguise technique for each mode. For 'about:blank', use the existing blank popup approach. For 'https://error', open the popup/window and push or replace the history state to display 'https://error' as the visible URL. For '123456789101112', open the popup/window and set the visible URL to the numeric string '123456789101112' using the History API or equivalent popup technique.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "makethis cloak for the url too"
+        ]
+      },
+      "acceptanceCriteria": [
+        "useCloaking.ts exports a cloak function that accepts a mode argument.",
+        "When mode is 'about:blank', the cloaked window/tab shows about:blank in the browser address bar.",
+        "When mode is 'https://error', the cloaked window/tab shows https://error in the browser address bar.",
+        "When mode is '123456789101112', the cloaked window/tab shows 123456789101112 in the browser address bar.",
+        "In all three modes, the full Cheetah app content renders inside the cloaked window."
+      ]
+    },
+    {
+      "id": "REQ-17",
+      "text": "Update CloakButton.tsx to integrate the new mode selector UI. Replace or augment the existing single-action cloak button with a compact control that shows the current selected mode and allows switching between the three modes ('about:blank', 'https://error', '123456789101112'). The cloak action button should trigger the cloak using the currently selected mode. Style the selector consistently with the existing dark cheetah theme (dark background, yellow-orange accents).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "make a options for the cloaking the cloaking is for the falcon only"
+        ]
+      },
+      "acceptanceCriteria": [
+        "CloakButton.tsx renders a mode selector alongside the falcon cloak trigger button.",
+        "The mode selector displays the three options: 'about:blank', 'https://error', '123456789101112'.",
+        "Clicking the cloak button triggers the selected mode via the updated useCloaking hook.",
+        "The component is styled using the existing dark/yellow-orange cheetah color tokens from Tailwind config.",
+        "No other toolbar components are modified."
       ]
     }
   ],
   "constraints": [
-    "Google Custom Search Engine ID must be exactly 'a566dfe30b89f4713' — do not alter or placeholder this value.",
-    "Do not modify any files listed under frontend.immutablePaths.",
-    "Keep all backend logic within the single actor in backend/main.mo."
+    "Cloaking options and mode selector must only appear in the Falcon Cloaking UI — do not expose them elsewhere in the app.",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+    "No backend changes are required for this feature."
   ],
   "nonGoals": [
-    "Adding a new API key input UI for users to configure their own search engine.",
-    "Supporting multiple search providers simultaneously.",
-    "Storing search history in the backend.",
-    "Changing any tab, cloaking, proxy, or URL normalization behavior."
+    "Adding any new cloaking modes beyond the three specified (about:blank, https://error, 123456789101112).",
+    "Persisting the selected cloak mode to the backend or across browser sessions.",
+    "Modifying the proxy, search, or tab system logic.",
+    "Changing the existing hotkey (Cmd+Tab+H) behavior unrelated to mode selection."
   ],
   "imageRequirements": {
     "required": [],

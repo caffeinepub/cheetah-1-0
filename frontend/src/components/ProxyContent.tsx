@@ -21,8 +21,8 @@ export function ProxyContent({ tab, onNavigate }: ProxyContentProps) {
         const links = doc.querySelectorAll('a[href]');
         links.forEach(link => {
           const anchor = link as HTMLAnchorElement;
-          if (anchor.dataset.cheetahIntercepted) return;
-          anchor.dataset.cheetahIntercepted = 'true';
+          if (anchor.dataset.navHandled) return;
+          anchor.dataset.navHandled = 'true';
           anchor.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -39,8 +39,8 @@ export function ProxyContent({ tab, onNavigate }: ProxyContentProps) {
       // Also intercept form submissions (search forms)
       const forms = doc.querySelectorAll('form');
       forms.forEach(form => {
-        if ((form as HTMLElement).dataset.cheetahIntercepted) return;
-        (form as HTMLElement).dataset.cheetahIntercepted = 'true';
+        if ((form as HTMLElement).dataset.navHandled) return;
+        (form as HTMLElement).dataset.navHandled = 'true';
         form.addEventListener('submit', (e) => {
           e.preventDefault();
           const action = form.action || '';
@@ -133,7 +133,6 @@ export function ProxyContent({ tab, onNavigate }: ProxyContentProps) {
       ref={iframeRef}
       className="flex-1 w-full border-none bg-white"
       sandbox="allow-scripts allow-forms allow-same-origin allow-popups"
-      title={tab.title || 'Cheetah Browser'}
     />
   );
 }
