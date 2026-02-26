@@ -2,14 +2,56 @@ import { useMutation } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { GoogleSearchResult } from './useTabManager';
 
+export interface ProxyResponse {
+  body: string;
+  contentType: string;
+  statusCode: number;
+}
+
 export function useProxyRequest() {
   const { actor } = useActor();
 
   return useMutation({
-    mutationFn: async (url: string): Promise<string> => {
+    mutationFn: async (url: string): Promise<ProxyResponse> => {
       if (!actor) throw new Error('Actor not initialized. Please wait and try again.');
-      const content = await actor.proxyUrl(url);
-      return content;
+      const raw = await actor.proxyUrl(url);
+
+      // The backend returns raw text. Try to detect content type from content.
+      // If it looks like HTML, treat it as HTML.
+      const trimmed = raw.trimStart();
+      const isHtml =
+        trimmed.startsWith('<!') ||
+        trimmed.startsWith('<html') ||
+        trimmed.startsWith('<HTML') ||
+        trimmed.includes('<body') ||
+        trimmed.includes('<head');
+
+      // Check if it looks like base64-encoded binary (image)
+      const isBase64 = /^[A-Za-z0-9+/\r\n]+=*$/.test(raw.trim()) && raw.length > 100 && !isHtml;
+
+      let contentType = 'text/html';
+      let body = raw;
+
+      if (isBase64) {
+        // Try to detect image type from base64 prefix
+        const prefix = raw.substring(0, 8);
+        if (prefix.startsWith('/9j/')) {
+          contentType = 'image/jpeg';
+          body = `data:image/jpeg;base64,${raw.trim()}`;
+        } else if (prefix.startsWith('iVBOR')) {
+          contentType = 'image/png';
+          body = `data:image/png;base64,${raw.trim()}`;
+        } else if (prefix.startsWith('R0lGOD')) {
+          contentType = 'image/gif';
+          body = `data:image/gif;base64,${raw.trim()}`;
+        } else {
+          contentType = 'application/octet-stream';
+        }
+      } else if (!isHtml) {
+        contentType = 'text/plain';
+      }
+
+      return { body, contentType, statusCode: 200 };
     },
   });
 }

@@ -1,39 +1,55 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Enable Direct URL Proxy Feature",
+  "title": "Implement actual web proxy functionality",
   "requirements": [
     {
       "id": "REQ-2",
-      "summary": "Add a proxyUrl React Query mutation in useQueries.ts that calls the backend proxyUrl actor method and returns the proxied content for rendering",
+      "summary": "Update useProxyRequest hook to handle full HTTP responses with body, content-type, and status code from the backend proxy",
       "acceptanceCriteria": [
-        "A useProxyUrl mutation (or equivalent) is defined in useQueries.ts.",
-        "It calls the backend actor's proxyUrl method with the given URL.",
-        "On success, it returns the proxied HTML content.",
-        "On error, it surfaces an error message usable by the UI."
+        "The mutation resolves with `{ body: string, contentType: string, statusCode: number }`.",
+        "HTML responses are passed through without modification.",
+        "Non-HTML binary content (images) is decoded from base64 and surfaced as a data URL."
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Add a useProxyUrl mutation that calls the backend actor's proxyUrl method with the provided URL string. The mutation should return the proxied HTML content on success and surface error messages on failure. This mutation will be consumed by BrowserLayout to handle direct URL navigation."
+          "description": "Modify the `useProxyRequest` mutation to expect a structured response from the backend actor containing body, content-type header, and status code. Parse the backend response to extract these fields. For binary content types (images), decode base64 body data and convert to data URLs. Return `{ body: string, contentType: string, statusCode: number }` to the caller."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Wire the direct URL proxy mutation into BrowserLayout.tsx so that entering a URL in the address bar triggers proxyUrl and renders the returned content in ProxyContent",
+      "summary": "Update ProxyContent component to render full proxied HTML using srcdoc and rewrite relative URLs to route through the proxy",
       "acceptanceCriteria": [
-        "Entering a valid URL in the address bar and submitting triggers the proxy mutation, not a search.",
-        "The proxied HTML is passed to ProxyContent for iframe rendering.",
-        "Loading and error states are reflected in the tab bar and UI.",
-        "The address bar URL is updated to reflect the navigated URL after successful proxy."
+        "The proxied HTML is rendered inside the iframe using `srcdoc` or a Blob URL.",
+        "Relative URLs in the HTML (href, src, action attributes) are rewritten to resolve through the proxy.",
+        "Clicking links inside the proxied iframe triggers `onNavigate` with the resolved absolute URL.",
+        "Form submissions inside the iframe are intercepted and routed through `onNavigate`.",
+        "The address bar reflects the currently proxied URL."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ProxyContent.tsx",
+          "operation": "modify",
+          "description": "Update the component to accept the full proxied HTML response body and content-type from the parent. Implement URL rewriting logic that parses the HTML string and rewrites all relative URLs (href, src, action attributes) to absolute URLs resolved against the original proxied URL. Render the rewritten HTML inside the iframe using the `srcdoc` attribute instead of a plain `src`. Add an iframe message listener to intercept navigation events (link clicks, form submissions) inside the iframe and call `onNavigate` with the resolved absolute URL. Ensure the address bar reflects the currently proxied URL by syncing it via the parent component's tab state."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Update BrowserLayout to display loading indicators and error messages during proxy requests",
+      "acceptanceCriteria": [
+        "A loading indicator is visible in the active tab while a proxy request is pending.",
+        "If the proxy request fails, an error message is shown in the content area with the failed URL and a retry button.",
+        "Successful proxy responses clear any previous error state."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/BrowserLayout.tsx",
           "operation": "modify",
-          "description": "Integrate the useProxyUrl mutation into the navigation flow. When the user enters a URL (detected by AddressBar logic) and submits, call the proxyUrl mutation instead of the search mutation. On success, pass the proxied HTML content to ProxyContent for iframe rendering and update the active tab's URL and content state. Reflect loading and error states in the tab bar and UI. Ensure the address bar URL updates to the navigated URL after successful proxy."
+          "description": "Add state management for tracking proxy request loading and error states. When a proxy request is initiated, set the loading state and pass it to the TabBar component so a spinner is displayed in the active tab. Handle the mutation result from `useProxyRequest`: on success, clear any previous error state and update the tab content; on failure, store the error message and failed URL in state. In the content rendering area, check for error state and display an inline error message showing the failed URL and a retry button that re-triggers the proxy request. Ensure the loading indicator is cleared when the request completes or fails."
         }
       ]
     }

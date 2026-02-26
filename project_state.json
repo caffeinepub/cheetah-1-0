@@ -1,16 +1,32 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
+  "summary": "A website that functions as an actual web proxy.",
   "architectural_notes": [],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-add-a-proxyurl-react-query-mutation-in-frontend-src-hooks-usequeries-ts-that-calls-the-backend-proxyurl-actor-method-parses-the-response-and-returns-the-proxied-content-for-rendering",
-      "title": "Add a `proxyUrl` React Query mutation in `frontend/src/hooks/useQueries.ts` that calls the backend `proxyUrl` actor method, parses the response, and returns the proxied content for rendering.",
+      "id": "feature-update-useproxyrequest-in-frontend-src-hooks-usequeries-ts-to-pass-the-full-response-body-and-content-type-returned-by-the-upgraded-backend-actor-to-the-caller-supporting-html-css-js-and-image-content-types",
+      "title": "Update `useProxyRequest` in `frontend/src/hooks/useQueries.ts` to pass the full response body and content-type returned by the upgraded backend actor to the caller, supporting HTML, CSS, JS, and image content types.",
       "reqIds": [
         "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-components-proxycontent-tsx-to-render-the-full-proxied-html-response-in-the-iframe-using-a-srcdoc-attribute-or-a-blob-url-instead-of-a-plain-src-so-actual-remote-page-content-is-displayed-rewrite-relative-urls-in-the-proxied-html-links-images-scripts-stylesheets-to-route-back-through-the-proxy-via-the-onnavigate-callback-preserving-navigation-within-the-proxy",
+      "title": "Update `frontend/src/components/ProxyContent.tsx` to render the full proxied HTML response in the iframe using a `srcdoc` attribute (or a Blob URL) instead of a plain `src`, so actual remote page content is displayed. Rewrite relative URLs in the proxied HTML (links, images, scripts, stylesheets) to route back through the proxy via the `onNavigate` callback, preserving navigation within the proxy.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-components-browserlayout-tsx-to-handle-loading-states-and-errors-during-proxy-requests-showing-a-spinner-in-the-tab-bar-while-the-proxy-fetch-is-in-progress-and-an-inline-error-message-in-the-content-area-if-the-proxy-request-fails",
+      "title": "Update `frontend/src/components/BrowserLayout.tsx` to handle loading states and errors during proxy requests, showing a spinner in the tab bar while the proxy fetch is in progress and an inline error message in the content area if the proxy request fails.",
+      "reqIds": [
+        "REQ-4"
       ],
       "version": 1
     }
@@ -18,27 +34,20 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Make Direct URL proxy available",
+      "summary": "Implement actual web proxy functionality on the website",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Implement a backend `proxyUrl` function in the Motoko actor that accepts a URL string, performs an HTTP outcall to fetch the resource, and returns the response body (HTML/content) along with relevant headers (content-type, status).",
+      "summary": "Upgrade the backend `proxyUrl` function to fully proxy arbitrary HTTP/HTTPS URLs via ICP HTTP outcalls: fetch the target URL, return the full response body (HTML, CSS, JS, images as base64), status code, and content-type header so the frontend can render actual remote web content.",
       "reqIds": [
         "REQ-1"
       ],
       "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Wire the direct URL proxy mutation into `BrowserLayout.tsx` so that when the user enters a URL (rather than a search query) in the address bar, the app calls `proxyUrl` and renders the returned content inside `ProxyContent`.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "status": "pending"
     }
   ],
+  "gameProjectType": "none",
   "projectName": "Cheetah Browser",
   "clarification_mode": "instant",
   "clarification_rounds": 0

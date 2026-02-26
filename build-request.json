@@ -1,76 +1,96 @@
 {
   "kind": "build_request",
-  "title": "Enable Direct URL Proxy Feature",
+  "title": "Implement actual web proxy functionality",
   "projectName": "Cheetah Browser",
-  "priority": "normal",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Implement a backend `proxyUrl` function in the Motoko actor that accepts a URL string, performs an HTTP outcall to fetch the resource, and returns the response body (HTML/content) along with relevant headers (content-type, status).",
+      "text": "Upgrade the backend `proxyUrl` function to fully proxy arbitrary HTTP/HTTPS URLs via ICP HTTP outcalls: fetch the target URL, return the full response body (HTML, CSS, JS, images as base64), status code, and content-type header so the frontend can render actual remote web content.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "make Direct URL proxy available"
+          "make this website an actual proxy"
         ]
       },
       "acceptanceCriteria": [
-        "A `proxyUrl(url: Text)` public function exists in the backend actor.",
-        "The function performs an outbound HTTP GET request to the given URL.",
-        "The function returns the response body and HTTP status code.",
-        "A `transform` callback or equivalent is provided for response sanitization."
+        "Calling `proxyUrl` with a valid HTTPS URL returns the full response body and a 200-equivalent status.",
+        "The returned content-type header is preserved from the upstream response.",
+        "Binary resources (images) are returned as base64-encoded data.",
+        "Errors from the upstream server are propagated back with the appropriate status code."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Add a `proxyUrl` React Query mutation in `frontend/src/hooks/useQueries.ts` that calls the backend `proxyUrl` actor method, parses the response, and returns the proxied content for rendering.",
+      "text": "Update `useProxyRequest` in `frontend/src/hooks/useQueries.ts` to pass the full response body and content-type returned by the upgraded backend actor to the caller, supporting HTML, CSS, JS, and image content types.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "make Direct URL proxy available"
+          "make this website an actual proxy"
         ]
       },
       "acceptanceCriteria": [
-        "A `useProxyUrl` mutation (or equivalent) is defined in `useQueries.ts`.",
-        "It calls the backend actor's `proxyUrl` method with the given URL.",
-        "On success, it returns the proxied HTML content.",
-        "On error, it surfaces an error message usable by the UI."
+        "The mutation resolves with `{ body: string, contentType: string, statusCode: number }`.",
+        "HTML responses are passed through without modification.",
+        "Non-HTML binary content (images) is decoded from base64 and surfaced as a data URL."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Wire the direct URL proxy mutation into `BrowserLayout.tsx` so that when the user enters a URL (rather than a search query) in the address bar, the app calls `proxyUrl` and renders the returned content inside `ProxyContent`.",
+      "text": "Update `frontend/src/components/ProxyContent.tsx` to render the full proxied HTML response in the iframe using a `srcdoc` attribute (or a Blob URL) instead of a plain `src`, so actual remote page content is displayed. Rewrite relative URLs in the proxied HTML (links, images, scripts, stylesheets) to route back through the proxy via the `onNavigate` callback, preserving navigation within the proxy.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "make Direct URL proxy available"
+          "make this website an actual proxy"
         ]
       },
       "acceptanceCriteria": [
-        "Entering a valid URL in the address bar and submitting triggers the proxy mutation, not a search.",
-        "The proxied HTML is passed to `ProxyContent` for iframe rendering.",
-        "Loading and error states are reflected in the tab bar and UI.",
-        "The address bar URL is updated to reflect the navigated URL after successful proxy."
+        "The proxied HTML is rendered inside the iframe using `srcdoc` or a Blob URL.",
+        "Relative URLs in the HTML (href, src, action attributes) are rewritten to resolve through the proxy.",
+        "Clicking links inside the proxied iframe triggers `onNavigate` with the resolved absolute URL.",
+        "Form submissions inside the iframe are intercepted and routed through `onNavigate`.",
+        "The address bar reflects the currently proxied URL."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Update `frontend/src/components/BrowserLayout.tsx` to handle loading states and errors during proxy requests, showing a spinner in the tab bar while the proxy fetch is in progress and an inline error message in the content area if the proxy request fails.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "make this website an actual proxy"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A loading indicator is visible in the active tab while a proxy request is pending.",
+        "If the proxy request fails, an error message is shown in the content area with the failed URL and a retry button.",
+        "Successful proxy responses clear any previous error state."
       ]
     }
   ],
   "constraints": [
-    "All backend logic must remain in the single Motoko actor in backend/main.mo.",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui."
+    "All backend logic must remain in the single actor in backend/main.mo.",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+    "Proxy requests must go through the ICP HTTP outcalls mechanism — no external proxy servers or third-party relay services."
   ],
   "nonGoals": [
-    "Adding support for non-HTTP protocols (e.g., FTP, WebSocket).",
-    "Caching proxied content on the backend.",
-    "Authentication or login-gating for the proxy feature.",
-    "Modifying the Google Custom Search integration."
+    "Adding user authentication or login-gating to the proxy.",
+    "Proxying WebSocket connections.",
+    "Caching proxied responses in the backend.",
+    "Supporting POST/PUT/DELETE methods in the proxy (GET only for now).",
+    "Bypassing HTTPS certificate validation."
   ],
   "imageRequirements": {
     "required": [],

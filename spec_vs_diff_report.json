@@ -1,55 +1,64 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T00:08:37.906Z",
-  "summary": "The diff implements most of the requested features. REQ-1 (backend proxyUrl) and REQ-2 (frontend useProxyUrl mutation) are substantially implemented. REQ-3 (wiring into BrowserLayout.tsx) is mentioned in the file summary but BrowserLayout.tsx content is not shown in the diff. The transform callback exists but proxyUrl returns only Text, not a structured type with headers/status. Several acceptance criteria gaps exist.",
+  "generatedAt": "2026-02-26T00:40:49.264Z",
+  "summary": "The diff implements most of the requested requirements. REQ-2, REQ-3, and REQ-4 are well-covered. REQ-1 has a partial implementation — the backend proxyUrl function is updated but the outcall module only returns raw text, not a structured response with status code and content-type. Several AC items for REQ-1 (status code propagation, content-type preservation, base64 for images) are handled heuristically on the frontend rather than in the backend. REQ-4's retry button AC item appears missing from the diff. REQ-2's statusCode is hardcoded to 200 rather than propagated from the upstream server.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "The function returns the response body AND HTTP status code (and relevant headers like content-type).",
-      "reason": "The proxyUrl function in backend/main.mo returns only async Text (the response body). There is no structured return type carrying HTTP status code or content-type headers.",
+      "requirement": "Return status code and content-type header from the backend proxyUrl function, and return binary resources as base64-encoded data from the backend.",
+      "reason": "The backend main.mo only returns raw text (a single Text value) from proxyUrl. There is no structured return type with statusCode, contentType, and body. Content-type detection and base64 handling are done heuristically on the frontend, not propagated from the upstream server. Errors from upstream are not propagated with appropriate status codes — statusCode is hardcoded to 200 in useQueries.ts.",
       "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "requirement": "On error, it surfaces an error message usable by the UI.",
-      "reason": "The useProxyRequest mutation in useQueries.ts has no explicit error handling or error message shaping — it simply re-throws the raw actor error with no user-facing transformation.",
-      "evidence": [
+        "backend/main.mo",
         "frontend/src/hooks/useQueries.ts"
       ]
     },
     {
-      "id": "REQ-3",
-      "requirement": "Wire the direct URL proxy mutation into BrowserLayout.tsx so that entering a URL triggers proxyUrl, proxied HTML is passed to ProxyContent, loading/error states are reflected, and address bar URL is updated after success.",
-      "reason": "BrowserLayout.tsx is listed only in the file summary as modified but its actual diff content is not shown. Cannot verify from available evidence that all REQ-3 acceptance criteria are met.",
+      "id": "REQ-4",
+      "requirement": "If the proxy request fails, an error message is shown in the content area with the failed URL and a retry button.",
+      "reason": "The diff shows error state handling and error messages in BrowserLayout.tsx, but no retry button is visible in the truncated diff. The ProxyContent.tsx file-summary mentions error state handling but no retry button UI is described.",
       "evidence": [
-        "frontend-file-summaries.txt"
+        "frontend/src/components/BrowserLayout.tsx",
+        "frontend/src/components/ProxyContent.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Migration module (backend/migration.mo) that drops stable variables from a previous actor version.",
-      "reason": "The build request makes no mention of a migration module or dropping stable variables. This is an entirely new file not requested.",
+      "description": "DuckDuckGo HTML search parsing in useSearchRequest as a replacement for Google Custom Search API",
+      "reason": "The build request does not mention replacing or updating the search functionality. The useSearchRequest hook was rewritten to use DuckDuckGo HTML search and parse results, which was not requested.",
       "evidence": [
-        "backend/migration.mo"
+        "frontend/src/hooks/useQueries.ts"
       ]
     },
     {
-      "description": "useSearchRequest now uses DuckDuckGo HTML search via actor.proxyUrl instead of Google Custom Search.",
-      "reason": "The build request explicitly lists modifying the Google Custom Search integration as a non-goal. The diff replaces the search backend with DuckDuckGo parsing, violating this constraint.",
+      "description": "GamesPage component with game site cards (Math Playground, Hood Math, Unblocked Games)",
+      "reason": "No requirement in the build request mentions adding a games page or game site navigation cards.",
       "evidence": [
-        "frontend/src/hooks/useQueries.ts"
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "description": "ClockWidget component displaying live time and date",
+      "reason": "No requirement in the build request mentions adding a clock widget.",
+      "evidence": [
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "description": "CloakButton with multiple disguise modes using history.replaceState",
+      "reason": "No requirement in the build request mentions adding or modifying a cloaking or disguise feature.",
+      "evidence": [
+        "frontend-file-summaries.txt"
       ]
     }
   ],
   "confidence": 0.72,
   "changed_files": [
     "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
+    "frontend/src/components/BrowserLayout.tsx",
+    "frontend/src/components/ProxyContent.tsx",
     "frontend/src/hooks/useQueries.ts",
     "project_state.json"
   ]

@@ -1,7 +1,5 @@
-import Migration "migration";
 import OutCall "http-outcalls/outcall";
 
-(with migration = Migration.run)
 actor {
   // Transform callback for HTTP Outcalls
   public query func transform(input : OutCall.TransformationInput) : async OutCall.TransformationOutput {

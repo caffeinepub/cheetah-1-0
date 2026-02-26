@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-proxyurl-react-query-mutation-in-frontend-src-hooks-usequeries-ts-that-calls-the-backend-proxyurl-actor-method-parses-the-response-and-returns-the-proxied-content-for-rendering",
-      "featureTitle": "Add a `proxyUrl` React Query mutation in `frontend/src/hooks/useQueries.ts` that calls the backend `proxyUrl` actor method, parses the response, and returns the proxied content for rendering.",
+      "featureId": "feature-update-useproxyrequest-in-frontend-src-hooks-usequeries-ts-to-pass-the-full-response-body-and-content-type-returned-by-the-upgraded-backend-actor-to-the-caller-supporting-html-css-js-and-image-content-types",
+      "featureTitle": "Update `useProxyRequest` in `frontend/src/hooks/useQueries.ts` to pass the full response body and content-type returned by the upgraded backend actor to the caller, supporting HTML, CSS, JS, and image content types.",
       "files": [
         "frontend/src/hooks/useQueries.ts"
       ],
@@ -17,6 +17,44 @@
       ],
       "testIds": [
         "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-frontend-src-components-proxycontent-tsx-to-render-the-full-proxied-html-response-in-the-iframe-using-a-srcdoc-attribute-or-a-blob-url-instead-of-a-plain-src-so-actual-remote-page-content-is-displayed-rewrite-relative-urls-in-the-proxied-html-links-images-scripts-stylesheets-to-route-back-through-the-proxy-via-the-onnavigate-callback-preserving-navigation-within-the-proxy",
+      "featureTitle": "Update `frontend/src/components/ProxyContent.tsx` to render the full proxied HTML response in the iframe using a `srcdoc` attribute (or a Blob URL) instead of a plain `src`, so actual remote page content is displayed. Rewrite relative URLs in the proxied HTML (links, images, scripts, stylesheets) to route back through the proxy via the `onNavigate` callback, preserving navigation within the proxy.",
+      "files": [
+        "frontend/src/components/ProxyContent.tsx"
+      ],
+      "components": [
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-frontend-src-components-browserlayout-tsx-to-handle-loading-states-and-errors-during-proxy-requests-showing-a-spinner-in-the-tab-bar-while-the-proxy-fetch-is-in-progress-and-an-inline-error-message-in-the-content-area-if-the-proxy-request-fails",
+      "featureTitle": "Update `frontend/src/components/BrowserLayout.tsx` to handle loading states and errors during proxy requests, showing a spinner in the tab bar while the proxy fetch is in progress and an inline error message in the content area if the proxy request fails.",
+      "files": [
+        "frontend/src/components/BrowserLayout.tsx"
+      ],
+      "components": [
+        "http-outcalls@3.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
       ],
       "confidence": "high"
     }

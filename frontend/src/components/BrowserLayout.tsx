@@ -1,10 +1,12 @@
-import React from 'react';
-import { RotateCcw, Home, Shield } from 'lucide-react';
+import React, { useState } from 'react';
+import { RotateCcw, Home, Shield, Gamepad2 } from 'lucide-react';
 import { TabBar } from './TabBar';
 import { AddressBar } from './AddressBar';
 import { CloakButton } from './CloakButton';
 import { ProxyContent } from './ProxyContent';
 import { SearchResults } from './SearchResults';
+import { GamesPage } from './GamesPage';
+import { ClockWidget } from './ClockWidget';
 import { useTabManager } from '../hooks/useTabManager';
 import { useProxyRequest, useSearchRequest } from '../hooks/useQueries';
 
@@ -42,11 +44,15 @@ export function BrowserLayout() {
   const { tabs, activeTabId, activeTab, addTab, closeTab, switchTab, updateTab } = useTabManager();
   const proxyMutation = useProxyRequest();
   const searchMutation = useSearchRequest();
+  const [showGames, setShowGames] = useState(false);
 
   const navigate = async (input: string, tabId?: string) => {
     const targetId = tabId ?? activeTabId;
     const trimmed = input.trim();
     if (!trimmed) return;
+
+    // Close games page when navigating to a URL
+    setShowGames(false);
 
     // Don't navigate to "search: ..." prefixed strings
     const cleanInput = trimmed.startsWith('search: ') ? trimmed.slice('search: '.length) : trimmed;
@@ -68,10 +74,16 @@ export function BrowserLayout() {
 
     try {
       if (isUrlInput) {
-        const content = await proxyMutation.mutateAsync(normalizedUrl);
-        const title = extractTitle(content, getHostname(normalizedUrl));
+        const response = await proxyMutation.mutateAsync(normalizedUrl);
+        const { body, contentType } = response;
+
+        // Extract title from HTML responses
+        const title = contentType.includes('html')
+          ? extractTitle(body, getHostname(normalizedUrl))
+          : getHostname(normalizedUrl);
+
         updateTab(targetId, {
-          content,
+          content: body,
           isLoading: false,
           url: normalizedUrl,
           title,
@@ -114,6 +126,7 @@ export function BrowserLayout() {
   };
 
   const handleHome = () => {
+    setShowGames(false);
     updateTab(activeTabId, {
       content: null,
       url: '',
@@ -126,7 +139,12 @@ export function BrowserLayout() {
     });
   };
 
+  const handleToggleGames = () => {
+    setShowGames(prev => !prev);
+  };
+
   const showSearchResults =
+    !showGames &&
     activeTab &&
     !activeTab.isLoading &&
     !activeTab.error &&
@@ -155,6 +173,10 @@ export function BrowserLayout() {
           <div className="flex items-center gap-1 ml-1">
             <Shield size={10} className="text-cheetah-orange/60" />
             <span className="text-[10px] text-muted-foreground">Secure</span>
+          </div>
+          {/* Clock in title bar — right-aligned */}
+          <div className="ml-auto pr-1">
+            <ClockWidget />
           </div>
         </div>
 
@@ -186,6 +208,18 @@ export function BrowserLayout() {
             >
               <RotateCcw size={13} className={activeTab?.isLoading ? 'animate-spin' : ''} />
             </button>
+            {/* Games Button */}
+            <button
+              onClick={handleToggleGames}
+              className={`w-7 h-7 flex items-center justify-center rounded transition-colors ${
+                showGames
+                  ? 'text-cheetah-orange bg-cheetah-orange/15 border border-cheetah-orange/30'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-cheetah-surface'
+              }`}
+              title="Games"
+            >
+              <Gamepad2 size={13} />
+            </button>
           </div>
 
           {/* Address Bar */}
@@ -202,7 +236,9 @@ export function BrowserLayout() {
 
       {/* Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {activeTab && showSearchResults ? (
+        {showGames ? (
+          <GamesPage onNavigate={(url) => navigate(url, activeTabId)} />
+        ) : activeTab && showSearchResults ? (
           <SearchResults
             query={activeTab.searchQuery!}
             results={activeTab.searchResults!}
@@ -223,10 +259,12 @@ export function BrowserLayout() {
         <div className="flex items-center gap-2">
           <div className={`w-1.5 h-1.5 rounded-full ${activeTab?.isLoading ? 'bg-cheetah-orange animate-pulse' : activeTab?.error ? 'bg-destructive/60' : 'bg-green-500/60'}`} />
           <span className="text-[10px] text-muted-foreground font-mono truncate max-w-xs">
-            {activeTab?.isLoading
-              ? 'Loading...'
+            {showGames
+              ? 'Games'
+              : activeTab?.isLoading
+              ? `Loading ${activeTab?.url || ''}...`
               : activeTab?.error
-              ? 'Error'
+              ? `Error: ${activeTab.url}`
               : activeTab?.url || 'Ready'}
           </span>
         </div>

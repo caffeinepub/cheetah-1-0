@@ -1,11 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Enable the Direct URL proxy feature in Cheetah Browser so users can navigate to real web URLs via a backend HTTP outcall proxy.
+**Goal:** Implement real web proxy functionality so the Cheetah Browser can fetch and render actual remote web pages through the backend.
 
 **Planned changes:**
-- Add a `proxyUrl(url: Text)` function to the Motoko backend actor that performs an HTTP GET outcall and returns the response body and status code
-- Add a `useProxyUrl` mutation in `frontend/src/hooks/useQueries.ts` that calls the backend `proxyUrl` method and returns proxied HTML content or an error
-- Update `BrowserLayout.tsx` to detect when the address bar input is a URL, trigger the proxy mutation instead of a search, pass the returned HTML to `ProxyContent` for rendering, and reflect loading/error states in the UI
+- Upgrade the backend `proxyUrl` function to fetch arbitrary HTTP/HTTPS URLs via ICP HTTP outcalls, returning the full response body, status code, and content-type header (binary resources as base64)
+- Update `useProxyRequest` hook to handle the full proxy response (`body`, `contentType`, `statusCode`), surfacing images as data URLs
+- Update `ProxyContent.tsx` to render proxied HTML using `srcdoc` or a Blob URL in the iframe, rewriting relative URLs (href, src, action) to route through the proxy and intercepting link clicks and form submissions via `onNavigate`
+- Update `BrowserLayout.tsx` to show a loading spinner in the tab bar during proxy fetches and an inline error message with a retry button if the request fails
 
-**User-visible outcome:** Users can type a direct URL into the address bar and have the page content fetched and displayed via the on-chain proxy, with the address bar updating to the navigated URL on success.
+**User-visible outcome:** Users can type a real URL into the browser address bar and have the actual remote web page fetched and rendered inside the Cheetah Browser, with in-page navigation staying within the proxy.

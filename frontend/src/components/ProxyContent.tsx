@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { TabState } from '../hooks/useTabManager';
 
 interface ProxyContentProps {
@@ -7,10 +7,10 @@ interface ProxyContentProps {
 }
 
 /**
- * Injects a <base> tag into HTML so relative URLs resolve against the original site.
- * Also rewrites <meta http-equiv="Content-Security-Policy"> to avoid blocking.
+ * Rewrites relative URLs in HTML to absolute URLs resolved against baseUrl.
+ * Also removes CSP meta tags and injects a navigation interceptor script.
  */
-function injectBaseTag(html: string, baseUrl: string): string {
+function processHtml(html: string, baseUrl: string): string {
   // Remove any existing CSP meta tags that would block resources
   let processed = html.replace(
     /<meta[^>]+http-equiv=["']Content-Security-Policy["'][^>]*>/gi,
@@ -20,14 +20,98 @@ function injectBaseTag(html: string, baseUrl: string): string {
   // Remove existing base tags
   processed = processed.replace(/<base[^>]*>/gi, '');
 
-  // Inject base tag right after <head> or at the start of <html>
+  // Parse base URL for resolving relative URLs
+  let origin = '';
+  let basePath = '';
+  try {
+    const u = new URL(baseUrl);
+    origin = u.origin;
+    basePath = u.href.substring(0, u.href.lastIndexOf('/') + 1);
+  } catch {
+    // ignore
+  }
+
+  // Rewrite relative URLs in href, src, action attributes
+  if (origin) {
+    // Rewrite href="..." attributes (links, stylesheets)
+    processed = processed.replace(
+      /(\s(?:href|src|action)=["'])([^"'#][^"']*)(["'])/gi,
+      (match, prefix, url, suffix) => {
+        if (
+          url.startsWith('http://') ||
+          url.startsWith('https://') ||
+          url.startsWith('data:') ||
+          url.startsWith('blob:') ||
+          url.startsWith('mailto:') ||
+          url.startsWith('tel:') ||
+          url.startsWith('javascript:') ||
+          url.startsWith('//')
+        ) {
+          return match;
+        }
+        try {
+          const resolved = new URL(url, basePath).href;
+          return `${prefix}${resolved}${suffix}`;
+        } catch {
+          return match;
+        }
+      }
+    );
+
+    // Rewrite protocol-relative URLs
+    processed = processed.replace(
+      /(\s(?:href|src|action)=["'])(\/\/[^"']+)(["'])/gi,
+      (_match, prefix, url, suffix) => {
+        return `${prefix}https:${url}${suffix}`;
+      }
+    );
+  }
+
+  // Inject navigation interceptor script + base tag
+  const interceptorScript = `
+<script>
+(function() {
+  function sendNav(url) {
+    try { window.parent.postMessage({ type: 'cheetah-navigate', url: url }, '*'); } catch(e) {}
+  }
+  document.addEventListener('click', function(e) {
+    var el = e.target;
+    while (el && el.tagName !== 'A') el = el.parentElement;
+    if (!el) return;
+    var href = el.getAttribute('href');
+    if (!href || href === '#' || href.startsWith('javascript:')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var resolved = el.href || href;
+    sendNav(resolved);
+  }, true);
+  document.addEventListener('submit', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var form = e.target;
+    var action = form.action || window.location.href;
+    var method = (form.method || 'get').toLowerCase();
+    if (method === 'get') {
+      var data = new FormData(form);
+      var params = new URLSearchParams();
+      data.forEach(function(v, k) { params.append(k, v); });
+      var sep = action.includes('?') ? '&' : '?';
+      sendNav(action + sep + params.toString());
+    } else {
+      sendNav(action);
+    }
+  }, true);
+})();
+</script>`;
+
   const baseTag = `<base href="${baseUrl}" target="_self">`;
+
   if (/<head[^>]*>/i.test(processed)) {
-    processed = processed.replace(/(<head[^>]*>)/i, `$1${baseTag}`);
+    processed = processed.replace(/(<head[^>]*>)/i, `$1${baseTag}${interceptorScript}`);
   } else if (/<html[^>]*>/i.test(processed)) {
-    processed = processed.replace(/(<html[^>]*>)/i, `$1<head>${baseTag}</head>`);
+    processed = processed.replace(/(<html[^>]*>)/i, `$1<head>${baseTag}${interceptorScript}</head>`);
   } else {
-    processed = baseTag + processed;
+    processed = `<head>${baseTag}${interceptorScript}</head>` + processed;
   }
 
   return processed;
@@ -35,87 +119,40 @@ function injectBaseTag(html: string, baseUrl: string): string {
 
 export function ProxyContent({ tab, onNavigate }: ProxyContentProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [srcdoc, setSrcdoc] = useState<string | null>(null);
 
-  const injectLinkInterceptor = useCallback(() => {
-    const iframe = iframeRef.current;
-    if (!iframe || !iframe.contentDocument) return;
-
-    try {
-      const doc = iframe.contentDocument;
-
-      // Intercept all link clicks
-      const interceptLinks = () => {
-        const links = doc.querySelectorAll('a[href]');
-        links.forEach(link => {
-          const anchor = link as HTMLAnchorElement;
-          if (anchor.dataset.navHandled) return;
-          anchor.dataset.navHandled = 'true';
-          anchor.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const href = anchor.href || anchor.getAttribute('href') || '';
-            if (href && href !== '#' && !href.startsWith('javascript:')) {
-              onNavigate(href);
-            }
-          });
-        });
-      };
-
-      interceptLinks();
-
-      // Also intercept form submissions (search forms)
-      const forms = doc.querySelectorAll('form');
-      forms.forEach(form => {
-        if ((form as HTMLElement).dataset.navHandled) return;
-        (form as HTMLElement).dataset.navHandled = 'true';
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const action = form.action || '';
-          const inputs = form.querySelectorAll('input[type="text"], input[type="search"], input:not([type])');
-          let query = '';
-          inputs.forEach(input => {
-            if ((input as HTMLInputElement).value) {
-              query = (input as HTMLInputElement).value;
-            }
-          });
-          if (action && query) {
-            const url = `${action}?q=${encodeURIComponent(query)}`;
-            onNavigate(url);
-          } else if (action) {
-            onNavigate(action);
-          }
-        });
-      });
-    } catch {
-      // Cross-origin restrictions - can't intercept
-    }
+  // Listen for postMessage navigation events from the iframe
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'cheetah-navigate') {
+        const url = event.data.url as string;
+        if (url && url.startsWith('http')) {
+          onNavigate(url);
+        }
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
   }, [onNavigate]);
 
+  // Process HTML content whenever tab content or URL changes
   useEffect(() => {
-    if (!tab.content) return;
+    if (!tab.content) {
+      setSrcdoc(null);
+      return;
+    }
 
-    const iframe = iframeRef.current;
-    if (!iframe) return;
+    const isHtmlContent =
+      !tab.content.startsWith('data:image/') &&
+      !tab.content.startsWith('data:application/');
 
-    const doc = iframe.contentDocument || iframe.contentWindow?.document;
-    if (!doc) return;
-
-    // Inject base tag so relative URLs resolve correctly
-    const processedContent = tab.url && tab.url.startsWith('http')
-      ? injectBaseTag(tab.content, tab.url)
-      : tab.content;
-
-    doc.open();
-    doc.write(processedContent);
-    doc.close();
-
-    // Wait for content to load then intercept links
-    const timer = setTimeout(() => {
-      injectLinkInterceptor();
-    }, 150);
-
-    return () => clearTimeout(timer);
-  }, [tab.content, tab.url, injectLinkInterceptor]);
+    if (isHtmlContent && tab.url && tab.url.startsWith('http')) {
+      const processed = processHtml(tab.content, tab.url);
+      setSrcdoc(processed);
+    } else {
+      setSrcdoc(tab.content);
+    }
+  }, [tab.content, tab.url]);
 
   if (tab.isLoading) {
     return (
@@ -158,20 +195,30 @@ export function ProxyContent({ tab, onNavigate }: ProxyContentProps) {
     );
   }
 
-  if (tab.isNewTab && !tab.content) {
+  if ((tab.isNewTab && !tab.content) || !tab.content) {
     return <NewTabPage onNavigate={onNavigate} />;
   }
 
-  if (!tab.content) {
-    return <NewTabPage onNavigate={onNavigate} />;
+  // Render image content
+  if (tab.content.startsWith('data:image/')) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-cheetah-dark overflow-auto p-4">
+        <img
+          src={tab.content}
+          alt={tab.url}
+          className="max-w-full max-h-full object-contain"
+        />
+      </div>
+    );
   }
 
   return (
     <iframe
       ref={iframeRef}
       className="flex-1 w-full border-none bg-white"
-      sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+      sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-modals"
       style={{ height: '100%' }}
+      srcDoc={srcdoc ?? undefined}
     />
   );
 }
