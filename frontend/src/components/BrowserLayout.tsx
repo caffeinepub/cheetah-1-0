@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RotateCcw, Home, Shield, Gamepad2 } from 'lucide-react';
+import { RotateCcw, Shield, Gamepad2 } from 'lucide-react';
 import { TabBar } from './TabBar';
 import { AddressBar } from './AddressBar';
 import { CloakButton } from './CloakButton';
@@ -7,6 +7,9 @@ import { ProxyContent } from './ProxyContent';
 import { SearchResults } from './SearchResults';
 import { GamesPage } from './GamesPage';
 import { ClockWidget } from './ClockWidget';
+import { HomePage } from './HomePage';
+import { NavigationDrawer } from './NavigationDrawer';
+import { HomeIconButton } from './HomeIconButton';
 import { useTabManager } from '../hooks/useTabManager';
 import { useProxyRequest, useSearchRequest } from '../hooks/useQueries';
 
@@ -45,22 +48,34 @@ export function BrowserLayout() {
   const proxyMutation = useProxyRequest();
   const searchMutation = useSearchRequest();
   const [showGames, setShowGames] = useState(false);
+  const [navDrawerOpen, setNavDrawerOpen] = useState(false);
+
+  const resetToHome = () => {
+    setShowGames(false);
+    updateTab(activeTabId, {
+      content: null,
+      url: '',
+      title: 'New Tab',
+      isNewTab: true,
+      error: null,
+      isLoading: false,
+      searchResults: null,
+      searchQuery: null,
+    });
+  };
 
   const navigate = async (input: string, tabId?: string) => {
     const targetId = tabId ?? activeTabId;
     const trimmed = input.trim();
     if (!trimmed) return;
 
-    // Close games page when navigating to a URL
     setShowGames(false);
 
-    // Don't navigate to "search: ..." prefixed strings
     const cleanInput = trimmed.startsWith('search: ') ? trimmed.slice('search: '.length) : trimmed;
 
     const isUrlInput = isUrl(cleanInput);
     const normalizedUrl = isUrlInput ? normalizeUrl(cleanInput) : cleanInput;
 
-    // Set loading state immediately
     updateTab(targetId, {
       isLoading: true,
       error: null,
@@ -77,7 +92,6 @@ export function BrowserLayout() {
         const response = await proxyMutation.mutateAsync(normalizedUrl);
         const { body, contentType } = response;
 
-        // Extract title from HTML responses
         const title = contentType.includes('html')
           ? extractTitle(body, getHostname(normalizedUrl))
           : getHostname(normalizedUrl);
@@ -125,22 +139,27 @@ export function BrowserLayout() {
     }
   };
 
-  const handleHome = () => {
-    setShowGames(false);
-    updateTab(activeTabId, {
-      content: null,
-      url: '',
-      title: 'New Tab',
-      isNewTab: true,
-      error: null,
-      isLoading: false,
-      searchResults: null,
-      searchQuery: null,
-    });
-  };
-
   const handleToggleGames = () => {
     setShowGames(prev => !prev);
+  };
+
+  const handleNavDrawerNavigate = (page: 'home' | 'proxy' | 'games' | 'search') => {
+    if (page === 'home') {
+      resetToHome();
+    } else if (page === 'games') {
+      setShowGames(true);
+      // Make sure we're not on a blank new tab so the games page shows
+      if (activeTab?.isNewTab) {
+        updateTab(activeTabId, { isNewTab: false });
+      }
+    } else if (page === 'search') {
+      setShowGames(false);
+      // Focus address bar by resetting to a search-ready state
+      resetToHome();
+    } else if (page === 'proxy') {
+      setShowGames(false);
+      // Just close drawer and let user type in address bar
+    }
   };
 
   const showSearchResults =
@@ -151,7 +170,13 @@ export function BrowserLayout() {
     activeTab.searchResults !== null &&
     activeTab.searchQuery !== null;
 
-  // Determine what URL to show in the address bar
+  // Show HomePage when the active tab is a new/blank tab and not showing games
+  const showHomePage =
+    !showGames &&
+    activeTab?.isNewTab === true &&
+    !activeTab?.content &&
+    !activeTab?.searchResults;
+
   const addressBarUrl = activeTab?.searchQuery
     ? activeTab.searchQuery
     : (activeTab?.url ?? '');
@@ -174,7 +199,6 @@ export function BrowserLayout() {
             <Shield size={10} className="text-cheetah-orange/60" />
             <span className="text-[10px] text-muted-foreground">Secure</span>
           </div>
-          {/* Clock in title bar — right-aligned */}
           <div className="ml-auto pr-1">
             <ClockWidget />
           </div>
@@ -191,15 +215,7 @@ export function BrowserLayout() {
 
         {/* Toolbar */}
         <div className="flex items-center gap-2 px-3 py-2">
-          {/* Nav Buttons */}
           <div className="flex items-center gap-1">
-            <button
-              onClick={handleHome}
-              className="w-7 h-7 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-cheetah-surface transition-colors"
-              title="Home"
-            >
-              <Home size={13} />
-            </button>
             <button
               onClick={handleReload}
               disabled={activeTab?.isLoading}
@@ -235,9 +251,11 @@ export function BrowserLayout() {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden relative">
         {showGames ? (
           <GamesPage onNavigate={(url) => navigate(url, activeTabId)} />
+        ) : showHomePage ? (
+          <HomePage onNavigate={handleNavDrawerNavigate} />
         ) : activeTab && showSearchResults ? (
           <SearchResults
             query={activeTab.searchQuery!}
@@ -261,6 +279,8 @@ export function BrowserLayout() {
           <span className="text-[10px] text-muted-foreground font-mono truncate max-w-xs">
             {showGames
               ? 'Games'
+              : showHomePage
+              ? 'Home'
               : activeTab?.isLoading
               ? `Loading ${activeTab?.url || ''}...`
               : activeTab?.error
@@ -273,6 +293,16 @@ export function BrowserLayout() {
           <span className="text-[10px] text-cheetah-orange/60 font-mono">v1.0</span>
         </div>
       </div>
+
+      {/* Home Icon Button (fixed bottom-left, always visible) */}
+      <HomeIconButton onClick={() => setNavDrawerOpen(true)} />
+
+      {/* Navigation Drawer */}
+      <NavigationDrawer
+        isOpen={navDrawerOpen}
+        onClose={() => setNavDrawerOpen(false)}
+        onNavigate={handleNavDrawerNavigate}
+      />
     </div>
   );
 }

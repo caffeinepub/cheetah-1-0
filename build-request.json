@@ -1,96 +1,78 @@
 {
   "kind": "build_request",
-  "title": "Implement actual web proxy functionality",
+  "title": "Redesign homepage with dark purple theme, centered branding, and home icon nav bar",
   "projectName": "Cheetah Browser",
-  "priority": "high",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Upgrade the backend `proxyUrl` function to fully proxy arbitrary HTTP/HTTPS URLs via ICP HTTP outcalls: fetch the target URL, return the full response body (HTML, CSS, JS, images as base64), status code, and content-type header so the frontend can render actual remote web content.",
-      "target": "backend",
+      "text": "Create a new HomePage component styled after the reference screenshot: a full-screen dark purple gradient background (deep near-black purple at edges, slightly lighter/glowing purple in the center), with a live clock and temperature-style widget centered at the top (reuse ClockWidget), a large centered brand title using a gradient text effect (fading from dark purple/dim to bright white, similar to the reference but using the app's own name — 'Cheetah' or 'CHEETAH PROXY' — instead of 'VAPOR v4'), a subtle tagline below the title in muted gray text, and a version/Discord-style info line at the bottom center.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-13"
         ],
         "quotes": [
-          "make this website an actual proxy"
+          "make a home page look like this just don't say vapor v4"
         ]
       },
       "acceptanceCriteria": [
-        "Calling `proxyUrl` with a valid HTTPS URL returns the full response body and a 200-equivalent status.",
-        "The returned content-type header is preserved from the upstream response.",
-        "Binary resources (images) are returned as base64-encoded data.",
-        "Errors from the upstream server are propagated back with the appropriate status code."
+        "Page renders with a full-screen dark purple radial gradient background matching the reference screenshot aesthetic",
+        "No text says 'VAPOR' or 'v4' anywhere on the page",
+        "A large centered heading uses gradient text (dim purple to bright white left-to-right) displaying the app's own branding name",
+        "A muted gray subtitle/tagline is displayed below the main heading",
+        "ClockWidget (or equivalent) is displayed at the top center showing current time",
+        "A version/info line is displayed at the bottom center of the page"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Update `useProxyRequest` in `frontend/src/hooks/useQueries.ts` to pass the full response body and content-type returned by the upgraded backend actor to the caller, supporting HTML, CSS, JS, and image content types.",
+      "text": "Add a home icon button fixed to the bottom-left corner of the screen (matching the reference screenshot's bottom-left home icon position). Clicking the home icon opens a navigation drawer or overlay panel that lists links to ALL pages/sections of the app: Home, Proxy/Browser, Games, Search, and any other existing pages. Clicking a nav link navigates to that page and closes the panel.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-13"
         ],
         "quotes": [
-          "make this website an actual proxy"
+          "the home icon goes to the navigation bar that accesses ALL pages"
         ]
       },
       "acceptanceCriteria": [
-        "The mutation resolves with `{ body: string, contentType: string, statusCode: number }`.",
-        "HTML responses are passed through without modification.",
-        "Non-HTML binary content (images) is decoded from base64 and surfaced as a data URL."
+        "A home icon button is fixed at the bottom-left corner of the viewport on all pages",
+        "Clicking the home icon opens a navigation panel or drawer",
+        "The navigation panel lists links to all available pages: Home, Browser/Proxy, Games, Search",
+        "Clicking any nav link navigates to the correct page and closes the nav panel",
+        "The home icon and nav panel are visible and accessible from every page in the app"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Update `frontend/src/components/ProxyContent.tsx` to render the full proxied HTML response in the iframe using a `srcdoc` attribute (or a Blob URL) instead of a plain `src`, so actual remote page content is displayed. Rewrite relative URLs in the proxied HTML (links, images, scripts, stylesheets) to route back through the proxy via the `onNavigate` callback, preserving navigation within the proxy.",
+      "text": "Integrate the new HomePage as the default landing view inside BrowserLayout (or as a new top-level route). When a new tab is opened or the app first loads, show the HomePage instead of a blank/empty state. The existing proxy, search, and games views remain accessible via navigation.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-13"
         ],
         "quotes": [
-          "make this website an actual proxy"
+          "make the website home page"
         ]
       },
       "acceptanceCriteria": [
-        "The proxied HTML is rendered inside the iframe using `srcdoc` or a Blob URL.",
-        "Relative URLs in the HTML (href, src, action attributes) are rewritten to resolve through the proxy.",
-        "Clicking links inside the proxied iframe triggers `onNavigate` with the resolved absolute URL.",
-        "Form submissions inside the iframe are intercepted and routed through `onNavigate`.",
-        "The address bar reflects the currently proxied URL."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Update `frontend/src/components/BrowserLayout.tsx` to handle loading states and errors during proxy requests, showing a spinner in the tab bar while the proxy fetch is in progress and an inline error message in the content area if the proxy request fails.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "make this website an actual proxy"
-        ]
-      },
-      "acceptanceCriteria": [
-        "A loading indicator is visible in the active tab while a proxy request is pending.",
-        "If the proxy request fails, an error message is shown in the content area with the failed URL and a retry button.",
-        "Successful proxy responses clear any previous error state."
+        "Opening the app or a new tab shows the HomePage by default",
+        "The HomePage is not shown when the user is actively viewing proxied content, search results, or the games page",
+        "Navigating via the home icon nav bar back to 'Home' returns to the HomePage"
       ]
     }
   ],
   "constraints": [
-    "All backend logic must remain in the single actor in backend/main.mo.",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
-    "Proxy requests must go through the ICP HTTP outcalls mechanism — no external proxy servers or third-party relay services."
+    "Do not use the text 'VAPOR' or 'v4' anywhere in the UI",
+    "Do not modify files in frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "Keep all existing proxy, search, tab, and games functionality intact"
   ],
   "nonGoals": [
-    "Adding user authentication or login-gating to the proxy.",
-    "Proxying WebSocket connections.",
-    "Caching proxied responses in the backend.",
-    "Supporting POST/PUT/DELETE methods in the proxy (GET only for now).",
-    "Bypassing HTTPS certificate validation."
+    "Adding any network bypass, proxy circumvention, or school filter evasion features",
+    "Backend changes",
+    "Changing the overall Cheetah dark/orange theme tokens — the homepage uses a purple variant only for its own background"
   ],
   "imageRequirements": {
     "required": [],

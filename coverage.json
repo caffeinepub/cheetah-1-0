@@ -1,50 +1,50 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T00:40:49.266Z",
+  "generatedAt": "2026-02-26T21:02:03.199Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
+    "total": 3,
     "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Upgrade the backend `proxyUrl` function to fully proxy arbitrary HTTP/HTTPS URLs via ICP HTTP outcalls: fetch the target URL, return the full response body (HTML, CSS, JS, images as base64), status code, and content-type header so the frontend can render actual remote web content.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Create a new HomePage component styled after the reference screenshot: a full-screen dark purple gradient background (deep near-black purple at edges, slightly lighter/glowing purple in the center), with a live clock and temperature-style widget centered at the top (reuse ClockWidget), a large centered brand title using a gradient text effect (fading from dark purple/dim to bright white, similar to the reference but using the app's own name — 'Cheetah' or 'CHEETAH PROXY' — instead of 'VAPOR v4'), a subtle tagline below the title in muted gray text, and a version/Discord-style info line at the bottom center.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/HomePage.tsx",
+          "frontend/src/index.css"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/HomePage.tsx",
+          "frontend/src/index.css"
+        ]
       },
       {
         "id": "REQ-2",
-        "summary": "Update `useProxyRequest` in `frontend/src/hooks/useQueries.ts` to pass the full response body and content-type returned by the upgraded backend actor to the caller, supporting HTML, CSS, JS, and image content types.",
+        "summary": "Add a home icon button fixed to the bottom-left corner of the screen (matching the reference screenshot's bottom-left home icon position). Clicking the home icon opens a navigation drawer or overlay panel that lists links to ALL pages/sections of the app: Home, Proxy/Browser, Games, Search, and any other existing pages. Clicking a nav link navigates to that page and closes the panel.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/NavigationDrawer.tsx",
+          "frontend/src/components/HomeIconButton.tsx",
+          "frontend/src/components/BrowserLayout.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/NavigationDrawer.tsx",
+          "frontend/src/components/HomeIconButton.tsx",
+          "frontend/src/components/BrowserLayout.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Update `frontend/src/components/ProxyContent.tsx` to render the full proxied HTML response in the iframe using a `srcdoc` attribute (or a Blob URL) instead of a plain `src`, so actual remote page content is displayed. Rewrite relative URLs in the proxied HTML (links, images, scripts, stylesheets) to route back through the proxy via the `onNavigate` callback, preserving navigation within the proxy.",
+        "summary": "Integrate the new HomePage as the default landing view inside BrowserLayout (or as a new top-level route). When a new tab is opened or the app first loads, show the HomePage instead of a blank/empty state. The existing proxy, search, and games views remain accessible via navigation.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/ProxyContent.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/ProxyContent.tsx"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Update `frontend/src/components/BrowserLayout.tsx` to handle loading states and errors during proxy requests, showing a spinner in the tab bar while the proxy fetch is in progress and an inline error message in the content area if the proxy request fails.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/BrowserLayout.tsx"
+          "frontend/src/components/BrowserLayout.tsx",
+          "frontend/src/hooks/useTabManager.ts"
         ],
         "matchedFiles": [
           "frontend/src/components/BrowserLayout.tsx"
@@ -53,14 +53,15 @@
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/components/BrowserLayout.tsx",
-    "frontend/src/components/ProxyContent.tsx",
-    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/components/HomeIconButton.tsx",
+    "frontend/src/components/HomePage.tsx",
+    "frontend/src/components/NavigationDrawer.tsx",
+    "frontend/src/index.css",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

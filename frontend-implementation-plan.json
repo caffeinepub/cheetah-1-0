@@ -1,55 +1,78 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Implement actual web proxy functionality",
+  "title": "Redesign homepage with dark purple theme, centered branding, and home icon nav bar",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Update useProxyRequest hook to handle full HTTP responses with body, content-type, and status code from the backend proxy",
+      "id": "REQ-1",
+      "summary": "Create a new HomePage component styled after the reference screenshot with dark purple gradient background, centered branding, live clock widget, and version info",
       "acceptanceCriteria": [
-        "The mutation resolves with `{ body: string, contentType: string, statusCode: number }`.",
-        "HTML responses are passed through without modification.",
-        "Non-HTML binary content (images) is decoded from base64 and surfaced as a data URL."
+        "Page renders with a full-screen dark purple radial gradient background matching the reference screenshot aesthetic",
+        "No text says 'VAPOR' or 'v4' anywhere on the page",
+        "A large centered heading uses gradient text (dim purple to bright white left-to-right) displaying the app's own branding name",
+        "A muted gray subtitle/tagline is displayed below the main heading",
+        "ClockWidget (or equivalent) is displayed at the top center showing current time",
+        "A version/info line is displayed at the bottom center of the page"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/HomePage.tsx",
+          "operation": "create",
+          "description": "Create the HomePage component featuring a full-screen dark purple radial gradient background (deep near-black purple at edges transitioning to a lighter glowing purple at center), ClockWidget positioned at top center, a large centered title with gradient text effect (dim purple fading to bright white) displaying 'CHEETAH PROXY' or 'Cheetah Browser', a muted gray tagline below the title, and a version/Discord info line at the bottom center. Use Tailwind classes for the radial gradient background and CSS custom gradient for the text effect. The component should be self-contained and export as default."
+        },
+        {
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Modify the `useProxyRequest` mutation to expect a structured response from the backend actor containing body, content-type header, and status code. Parse the backend response to extract these fields. For binary content types (images), decode base64 body data and convert to data URLs. Return `{ body: string, contentType: string, statusCode: number }` to the caller."
+          "description": "Add utility classes for the purple gradient text effect used on the HomePage title (gradient from dim purple to bright white, left-to-right) and ensure any additional purple theme utilities needed for the HomePage background are available. Keep the existing Cheetah dark/orange theme tokens intact; these purple utilities are for HomePage-specific styling only."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Add a home icon button fixed to the bottom-left corner that opens a navigation drawer listing all app pages",
+      "acceptanceCriteria": [
+        "A home icon button is fixed at the bottom-left corner of the viewport on all pages",
+        "Clicking the home icon opens a navigation panel or drawer",
+        "The navigation panel lists links to all available pages: Home, Browser/Proxy, Games, Search",
+        "Clicking any nav link navigates to the correct page and closes the nav panel",
+        "The home icon and nav panel are visible and accessible from every page in the app"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/NavigationDrawer.tsx",
+          "operation": "create",
+          "description": "Create a NavigationDrawer component that renders a slide-out overlay panel listing navigation links to all app pages: Home, Proxy/Browser, Games, and Search. The drawer should accept isOpen and onClose props, animate in/out from the left or bottom, and include click handlers on each link that call an onNavigate callback (passed as prop) with the target page identifier, then close the drawer. Style the drawer with the cheetah dark theme using Tailwind classes and ensure it overlays other content with appropriate z-index."
+        },
+        {
+          "path": "frontend/src/components/HomeIconButton.tsx",
+          "operation": "create",
+          "description": "Create a HomeIconButton component that renders a fixed-position home icon button at the bottom-left corner of the viewport. The button should accept an onClick prop and be styled consistently with the cheetah theme. Use a home/house icon (Lucide React or SVG) and apply Tailwind fixed positioning (fixed bottom-4 left-4) with appropriate z-index to ensure visibility above other content."
+        },
+        {
+          "path": "frontend/src/components/BrowserLayout.tsx",
+          "operation": "modify",
+          "description": "Wire the HomeIconButton and NavigationDrawer into BrowserLayout. Add state to track whether the navigation drawer is open. Render the HomeIconButton with an onClick handler that opens the drawer. Render the NavigationDrawer with isOpen, onClose, and onNavigate props. The onNavigate handler should interpret page identifiers ('home', 'proxy', 'games', 'search') and update the activeTab or routing state accordingly to display the correct view (HomePage for 'home', existing proxy/games/search views for the others). Ensure the home icon button and nav drawer are rendered outside the main content area so they appear on all views."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Update ProxyContent component to render full proxied HTML using srcdoc and rewrite relative URLs to route through the proxy",
+      "summary": "Integrate the new HomePage as the default landing view when the app first loads or a new tab is opened",
       "acceptanceCriteria": [
-        "The proxied HTML is rendered inside the iframe using `srcdoc` or a Blob URL.",
-        "Relative URLs in the HTML (href, src, action attributes) are rewritten to resolve through the proxy.",
-        "Clicking links inside the proxied iframe triggers `onNavigate` with the resolved absolute URL.",
-        "Form submissions inside the iframe are intercepted and routed through `onNavigate`.",
-        "The address bar reflects the currently proxied URL."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/ProxyContent.tsx",
-          "operation": "modify",
-          "description": "Update the component to accept the full proxied HTML response body and content-type from the parent. Implement URL rewriting logic that parses the HTML string and rewrites all relative URLs (href, src, action attributes) to absolute URLs resolved against the original proxied URL. Render the rewritten HTML inside the iframe using the `srcdoc` attribute instead of a plain `src`. Add an iframe message listener to intercept navigation events (link clicks, form submissions) inside the iframe and call `onNavigate` with the resolved absolute URL. Ensure the address bar reflects the currently proxied URL by syncing it via the parent component's tab state."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Update BrowserLayout to display loading indicators and error messages during proxy requests",
-      "acceptanceCriteria": [
-        "A loading indicator is visible in the active tab while a proxy request is pending.",
-        "If the proxy request fails, an error message is shown in the content area with the failed URL and a retry button.",
-        "Successful proxy responses clear any previous error state."
+        "Opening the app or a new tab shows the HomePage by default",
+        "The HomePage is not shown when the user is actively viewing proxied content, search results, or the games page",
+        "Navigating via the home icon nav bar back to 'Home' returns to the HomePage"
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/BrowserLayout.tsx",
           "operation": "modify",
-          "description": "Add state management for tracking proxy request loading and error states. When a proxy request is initiated, set the loading state and pass it to the TabBar component so a spinner is displayed in the active tab. Handle the mutation result from `useProxyRequest`: on success, clear any previous error state and update the tab content; on failure, store the error message and failed URL in state. In the content rendering area, check for error state and display an inline error message showing the failed URL and a retry button that re-triggers the proxy request. Ensure the loading indicator is cleared when the request completes or fails."
+          "description": "Modify BrowserLayout to render HomePage as the default view when no active content is loaded. Update the conditional rendering logic that currently switches between ProxyContent, SearchResults, and GamesPage to also include a case for HomePage. Show HomePage when the active tab has no URL, no search query, and no games flag set (i.e., a blank/new tab state). Import and integrate the HomePage component. Ensure that navigating to 'home' via the NavigationDrawer also triggers this HomePage view by resetting the active tab to a blank state. Preserve all existing proxy, search, tab, and games functionality."
+        },
+        {
+          "path": "frontend/src/hooks/useTabManager.ts",
+          "operation": "modify",
+          "description": "Ensure that the initial tab state and any newly added tabs default to a blank state that triggers the HomePage view in BrowserLayout (empty url, no searchQuery, no showGames flag). Review the addTab function to confirm new tabs start in this blank/home state. No changes to the TabState interface or core tab management logic are required unless the default initialization needs adjustment."
         }
       ]
     }
