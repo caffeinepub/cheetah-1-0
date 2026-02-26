@@ -108,37 +108,22 @@ export interface http_request_result {
     headers: Array<http_header>;
 }
 export interface backendInterface {
-    proxyRequest(endpoint: string): Promise<string>;
-    searchRequest(searchQuery: string): Promise<string>;
+    proxyGoogleSearch(searchQuery: string): Promise<string>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
 }
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
-    async proxyRequest(arg0: string): Promise<string> {
+    async proxyGoogleSearch(arg0: string): Promise<string> {
         if (this.processError) {
             try {
-                const result = await this.actor.proxyRequest(arg0);
+                const result = await this.actor.proxyGoogleSearch(arg0);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.proxyRequest(arg0);
-            return result;
-        }
-    }
-    async searchRequest(arg0: string): Promise<string> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.searchRequest(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.searchRequest(arg0);
+            const result = await this.actor.proxyGoogleSearch(arg0);
             return result;
         }
     }

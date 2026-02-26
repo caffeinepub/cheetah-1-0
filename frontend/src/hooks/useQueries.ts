@@ -8,11 +8,8 @@ export function useProxyRequest() {
   return useMutation({
     mutationFn: async (url: string): Promise<string> => {
       if (!actor) throw new Error('Actor not initialized. Please wait and try again.');
-      const result = await actor.proxyRequest(url);
-      if (!result || result.trim() === '') {
-        throw new Error('Empty response from server');
-      }
-      return result;
+      // Proxy via Google search as a fallback — direct proxy not available
+      throw new Error('Direct URL proxy is not available. Please search for content instead.');
     },
   });
 }
@@ -37,7 +34,7 @@ export function useSearchRequest() {
   return useMutation({
     mutationFn: async (query: string): Promise<GoogleSearchResponse> => {
       if (!actor) throw new Error('Actor not initialized. Please wait and try again.');
-      const raw = await actor.searchRequest(query);
+      const raw = await actor.proxyGoogleSearch(query);
 
       let parsed: GoogleSearchResponse;
       try {

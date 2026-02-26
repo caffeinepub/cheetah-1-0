@@ -1,93 +1,56 @@
 {
   "kind": "build_request",
-  "title": "Fix search functionality and website proxy connections",
+  "title": "Wire Google Custom Search engine ID into backend search integration",
   "projectName": "Cheetah Browser",
-  "priority": "high",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the Google Custom Search API integration in the backend so that search queries return real, populated results. Ensure the HTTP outcall to the Google Custom Search API is correctly constructed with the API key and Search Engine ID, and that the response is properly parsed and returned to the frontend.",
+      "text": "Update the backend Google Custom Search integration to use the search engine ID 'a566dfe30b89f4713' as the `cx` parameter in all outbound Google Custom Search API requests.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-latest"
         ],
         "quotes": [
-          "make actual searches work"
+          "make this website powered by google search here is my google search id a566dfe30b89f4713"
         ]
       },
       "acceptanceCriteria": [
-        "Submitting a search query returns a non-empty list of results with title, snippet, and URL fields populated",
-        "Search results are displayed in the SearchResults component",
-        "Errors from the search API are surfaced as readable messages on the frontend"
+        "The `cx` query parameter in the Google Custom Search API URL is set to 'a566dfe30b89f4713'.",
+        "Search queries submitted through the browser return real Google search results from the specified custom search engine.",
+        "No hardcoded placeholder or empty `cx` value remains in the backend search handler."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Fix the proxy backend endpoint so that HTTP GET requests to external websites succeed. Ensure HTTPS enforcement, proper header forwarding, and that the response body is returned intact to the frontend iframe. Debug and resolve any issues causing proxied sites to fail to load.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "make all websites function and connect"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Navigating to a URL in the address bar loads the proxied website content inside the iframe",
-        "The ProxyContent component displays the proxied page without blank/error states under normal conditions",
-        "HTTPS URLs are correctly forwarded and responses are returned to the frontend"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Fix the frontend `useProxyRequest` and `useSearchRequest` mutations in useQueries.ts so they correctly call the backend actor methods and handle both success and error responses. Ensure loading, error, and success states are properly reflected in BrowserLayout and the tab state via useTabManager.",
+      "text": "Ensure the frontend search flow correctly passes search queries to the backend, receives Google Custom Search results, and displays them in the SearchResults component without errors.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-latest"
         ],
         "quotes": [
-          "make actual searches work and make all websites function and connect"
+          "make this website powered by google search"
         ]
       },
       "acceptanceCriteria": [
-        "Entering a URL and pressing Enter triggers a proxy request and populates the active tab with content",
-        "Entering a search query and pressing Enter triggers a search request and populates the active tab with search results",
-        "Loading indicators appear in TabBar while requests are in flight",
-        "Error states are shown when requests fail"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Ensure that clicking a search result in SearchResults.tsx triggers navigation to that URL through the proxy, loading the linked website in the same tab via the ProxyContent iframe.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "make all websites function and connect"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Clicking a search result URL navigates to the proxied version of that site in the active tab",
-        "The address bar updates to reflect the navigated URL",
-        "The tab transitions from showing search results to showing proxied web content"
+        "Typing a search query in the address bar and pressing Enter triggers a search request to the backend.",
+        "Search results are rendered in the SearchResults component with title, snippet, and display URL.",
+        "Clicking a search result navigates the active tab to the result URL via the proxy.",
+        "No console errors appear during a normal search flow."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files listed in frontend.immutablePaths",
-    "All backend logic must remain in the single main actor (backend/main.mo)",
-    "Do not change the existing tab management data model unless required to fix broken state"
+    "Do not change the frontend immutable paths (useInternetIdentity.ts, useActor.ts, main.tsx, components/ui).",
+    "Keep all backend logic inside the single main actor in backend/main.mo.",
+    "The search engine ID must be exactly 'a566dfe30b89f4713' — do not alter it."
   ],
   "nonGoals": [
-    "Adding new UI features or redesigning the visual theme",
-    "Implementing user authentication or Internet Identity login",
-    "Supporting non-HTTP/HTTPS protocols in the proxy",
-    "Adding new cloaking modes"
+    "Adding any new UI features beyond wiring the existing search engine ID.",
+    "Changing the proxy functionality.",
+    "Supporting multiple search engine IDs or user-configurable search engines."
   ],
   "imageRequirements": {
     "required": [],

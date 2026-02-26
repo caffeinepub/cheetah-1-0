@@ -1,68 +1,37 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix search functionality and website proxy connections",
+  "title": "Wire Google Custom Search engine ID into backend search integration",
   "requirements": [
     {
-      "id": "REQ-3",
-      "summary": "Fix the frontend query mutations to correctly call backend methods and handle all response states",
+      "id": "REQ-2",
+      "summary": "Verify frontend search flow correctly passes queries to backend, receives Google Custom Search results, and displays them without errors",
       "acceptanceCriteria": [
-        "Entering a URL and pressing Enter triggers a proxy request and populates the active tab with content",
-        "Entering a search query and pressing Enter triggers a search request and populates the active tab with search results",
-        "Loading indicators appear in TabBar while requests are in flight",
-        "Error states are shown when requests fail"
+        "Typing a search query in the address bar and pressing Enter triggers a search request to the backend.",
+        "Search results are rendered in the SearchResults component with title, snippet, and display URL.",
+        "Clicking a search result navigates the active tab to the result URL via the proxy.",
+        "No console errors appear during a normal search flow."
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Fix the useProxyRequest and useSearchRequest mutations to correctly call the backend actor's proxyRequest and searchRequest methods. Ensure proper error handling for both success and failure cases. Return structured data that includes the response text and any error information. Update mutation callbacks to properly reflect loading, error, and success states that can be consumed by BrowserLayout and useTabManager."
+          "description": "Review and verify the useSearchRequest mutation correctly calls the backend's proxyGoogleSearch method and handles the response. Ensure error handling is in place for failed search requests."
         },
         {
           "path": "frontend/src/components/BrowserLayout.tsx",
           "operation": "modify",
-          "description": "Fix the integration between AddressBar input handling and the proxy/search mutations from useQueries. Ensure that when a URL is submitted, useProxyRequest is called with the correct endpoint parameter, and when a search query is submitted, useSearchRequest is called with the searchQuery parameter. Update the mutation success handlers to correctly update the active tab state via useTabManager with the returned content or search results. Ensure loading and error states from mutations are properly reflected in the tab state and passed to TabBar."
+          "description": "Review the search flow integration to ensure search queries from the address bar are passed to useSearchRequest mutation, results are stored in the active tab state, and error states are properly handled and displayed to the user."
         },
-        {
-          "path": "frontend/src/hooks/useTabManager.ts",
-          "operation": "modify",
-          "description": "Ensure the tab state model correctly tracks loading, error, content, and searchResults states for each tab. Add or fix methods to update a tab's state when proxy or search requests complete, fail, or are in progress. Ensure the active tab's loading state is accessible so that TabBar can display loading indicators during requests."
-        },
-        {
-          "path": "frontend/src/components/TabBar.tsx",
-          "operation": "modify",
-          "description": "Fix the rendering logic to correctly display loading indicators on the active tab when a proxy or search request is in flight. Ensure the loading state is read from the active tab's state (managed by useTabManager) and that the indicator is visible and correctly styled."
-        },
-        {
-          "path": "frontend/src/components/ProxyContent.tsx",
-          "operation": "modify",
-          "description": "Ensure ProxyContent correctly receives and displays the proxied content from the tab state. Fix the iframe rendering to handle the response body returned by the backend proxyRequest method. Ensure loading and error states are properly displayed when the tab is in those states. Verify that the link and form interceptors correctly trigger navigation through the proxy mutation when internal links are clicked."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Enable navigation from search results to proxied websites in the same tab",
-      "acceptanceCriteria": [
-        "Clicking a search result URL navigates to the proxied version of that site in the active tab",
-        "The address bar updates to reflect the navigated URL",
-        "The tab transitions from showing search results to showing proxied web content"
-      ],
-      "file_operations": [
         {
           "path": "frontend/src/components/SearchResults.tsx",
           "operation": "modify",
-          "description": "Fix the click handler for search result items to call the onNavigate callback with the result's URL. Ensure the URL is passed correctly so that BrowserLayout can trigger a proxy request for that URL in the active tab."
-        },
-        {
-          "path": "frontend/src/components/BrowserLayout.tsx",
-          "operation": "modify",
-          "description": "Ensure the onNavigate callback passed to SearchResults triggers a proxy request via useProxyRequest for the clicked URL. Update the active tab's URL and clear the search results state so that the tab transitions to showing proxied content. Ensure the address bar is updated to reflect the new URL."
+          "description": "Verify the component correctly parses and renders the search results returned from the backend, including title, snippet, and displayLink fields. Ensure the onNavigate callback is properly wired for result clicks."
         },
         {
           "path": "frontend/src/components/AddressBar.tsx",
           "operation": "modify",
-          "description": "Ensure the address bar value is synchronized with the active tab's URL. When the tab's URL changes (e.g., after clicking a search result), the address bar should update to display the new URL. This may require lifting state or passing the current URL as a controlled prop from BrowserLayout."
+          "description": "Review the search detection logic to ensure queries (non-URL input) trigger the search flow rather than proxy navigation. Verify the Enter key and submit button correctly invoke the search handler."
         }
       ]
     }

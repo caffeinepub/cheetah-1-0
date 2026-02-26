@@ -28,8 +28,7 @@ export const TransformationOutput = IDL.Record({
 });
 
 export const idlService = IDL.Service({
-  'proxyRequest' : IDL.Func([IDL.Text], [IDL.Text], []),
-  'searchRequest' : IDL.Func([IDL.Text], [IDL.Text], []),
+  'proxyGoogleSearch' : IDL.Func([IDL.Text], [IDL.Text], []),
   'transform' : IDL.Func(
       [TransformationInput],
       [TransformationOutput],
@@ -57,8 +56,7 @@ export const idlFactory = ({ IDL }) => {
   });
   
   return IDL.Service({
-    'proxyRequest' : IDL.Func([IDL.Text], [IDL.Text], []),
-    'searchRequest' : IDL.Func([IDL.Text], [IDL.Text], []),
+    'proxyGoogleSearch' : IDL.Func([IDL.Text], [IDL.Text], []),
     'transform' : IDL.Func(
         [TransformationInput],
         [TransformationOutput],

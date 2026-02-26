@@ -1,24 +1,18 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "App with search functionality and website connections. User wants actual searches to work and all websites to be functional and connected.",
-  "architectural_notes": [],
+  "summary": "Website project powered by Google Custom Search using the provided search engine ID.",
+  "architectural_notes": [
+    "Google Custom Search Engine ID: a566dfe30b89f4713"
+  ],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-fix-the-frontend-useproxyrequest-and-usesearchrequest-mutations-in-usequeries-ts-so-they-correctly-call-the-backend-actor-methods-and-handle-both-success-and-error-responses-ensure-loading-error-and-success-states-are-properly-reflected-in-browserlayout-and-the-tab-state-via-usetabmanager",
-      "title": "Fix the frontend `useProxyRequest` and `useSearchRequest` mutations in useQueries.ts so they correctly call the backend actor methods and handle both success and error responses. Ensure loading, error, and success states are properly reflected in BrowserLayout and the tab state via useTabManager.",
+      "id": "feature-ensure-the-frontend-search-flow-correctly-passes-search-queries-to-the-backend-receives-google-custom-search-results-and-displays-them-in-the-searchresults-component-without-errors",
+      "title": "Ensure the frontend search flow correctly passes search queries to the backend, receives Google Custom Search results, and displays them in the SearchResults component without errors.",
       "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-that-clicking-a-search-result-in-searchresults-tsx-triggers-navigation-to-that-url-through-the-proxy-loading-the-linked-website-in-the-same-tab-via-the-proxycontent-iframe",
-      "title": "Ensure that clicking a search result in SearchResults.tsx triggers navigation to that URL through the proxy, loading the linked website in the same tab via the ProxyContent iframe.",
-      "reqIds": [
-        "REQ-4"
+        "REQ-2"
       ],
       "version": 1
     }
@@ -26,33 +20,20 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Make actual search functionality work (real search results)",
+      "summary": "Integrate Google Custom Search with search engine ID a566dfe30b89f4713",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Make all websites function and connect properly",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Fix the Google Custom Search API integration in the backend so that search queries return real, populated results. Ensure the HTTP outcall to the Google Custom Search API is correctly constructed with the API key and Search Engine ID, and that the response is properly parsed and returned to the frontend.",
+      "summary": "Update the backend Google Custom Search integration to use the search engine ID 'a566dfe30b89f4713' as the `cx` parameter in all outbound Google Custom Search API requests.",
       "reqIds": [
         "REQ-1"
       ],
       "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Fix the proxy backend endpoint so that HTTP GET requests to external websites succeed. Ensure HTTPS enforcement, proper header forwarding, and that the response body is returned intact to the frontend iframe. Debug and resolve any issues causing proxied sites to fail to load.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "status": "pending"
     }
   ],
+  "gameProjectType": "none",
   "projectName": "Cheetah Browser",
   "clarification_mode": "instant",
   "clarification_rounds": 0

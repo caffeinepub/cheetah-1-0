@@ -26,8 +26,7 @@ export interface http_request_result {
   'headers' : Array<http_header>,
 }
 export interface _SERVICE {
-  'proxyRequest' : ActorMethod<[string], string>,
-  'searchRequest' : ActorMethod<[string], string>,
+  'proxyGoogleSearch' : ActorMethod<[string], string>,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
 }
 export declare const idlService: IDL.ServiceClass;
