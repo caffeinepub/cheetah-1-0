@@ -1,56 +1,76 @@
 {
   "kind": "build_request",
-  "title": "Wire Google Custom Search engine ID into backend search integration",
+  "title": "Enable Direct URL Proxy Feature",
   "projectName": "Cheetah Browser",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Update the backend Google Custom Search integration to use the search engine ID 'a566dfe30b89f4713' as the `cx` parameter in all outbound Google Custom Search API requests.",
+      "text": "Implement a backend `proxyUrl` function in the Motoko actor that accepts a URL string, performs an HTTP outcall to fetch the resource, and returns the response body (HTML/content) along with relevant headers (content-type, status).",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-6"
         ],
         "quotes": [
-          "make this website powered by google search here is my google search id a566dfe30b89f4713"
+          "make Direct URL proxy available"
         ]
       },
       "acceptanceCriteria": [
-        "The `cx` query parameter in the Google Custom Search API URL is set to 'a566dfe30b89f4713'.",
-        "Search queries submitted through the browser return real Google search results from the specified custom search engine.",
-        "No hardcoded placeholder or empty `cx` value remains in the backend search handler."
+        "A `proxyUrl(url: Text)` public function exists in the backend actor.",
+        "The function performs an outbound HTTP GET request to the given URL.",
+        "The function returns the response body and HTTP status code.",
+        "A `transform` callback or equivalent is provided for response sanitization."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Ensure the frontend search flow correctly passes search queries to the backend, receives Google Custom Search results, and displays them in the SearchResults component without errors.",
+      "text": "Add a `proxyUrl` React Query mutation in `frontend/src/hooks/useQueries.ts` that calls the backend `proxyUrl` actor method, parses the response, and returns the proxied content for rendering.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-6"
         ],
         "quotes": [
-          "make this website powered by google search"
+          "make Direct URL proxy available"
         ]
       },
       "acceptanceCriteria": [
-        "Typing a search query in the address bar and pressing Enter triggers a search request to the backend.",
-        "Search results are rendered in the SearchResults component with title, snippet, and display URL.",
-        "Clicking a search result navigates the active tab to the result URL via the proxy.",
-        "No console errors appear during a normal search flow."
+        "A `useProxyUrl` mutation (or equivalent) is defined in `useQueries.ts`.",
+        "It calls the backend actor's `proxyUrl` method with the given URL.",
+        "On success, it returns the proxied HTML content.",
+        "On error, it surfaces an error message usable by the UI."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Wire the direct URL proxy mutation into `BrowserLayout.tsx` so that when the user enters a URL (rather than a search query) in the address bar, the app calls `proxyUrl` and renders the returned content inside `ProxyContent`.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "make Direct URL proxy available"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Entering a valid URL in the address bar and submitting triggers the proxy mutation, not a search.",
+        "The proxied HTML is passed to `ProxyContent` for iframe rendering.",
+        "Loading and error states are reflected in the tab bar and UI.",
+        "The address bar URL is updated to reflect the navigated URL after successful proxy."
       ]
     }
   ],
   "constraints": [
-    "Do not change the frontend immutable paths (useInternetIdentity.ts, useActor.ts, main.tsx, components/ui).",
-    "Keep all backend logic inside the single main actor in backend/main.mo.",
-    "The search engine ID must be exactly 'a566dfe30b89f4713' — do not alter it."
+    "All backend logic must remain in the single Motoko actor in backend/main.mo.",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui."
   ],
   "nonGoals": [
-    "Adding any new UI features beyond wiring the existing search engine ID.",
-    "Changing the proxy functionality.",
-    "Supporting multiple search engine IDs or user-configurable search engines."
+    "Adding support for non-HTTP protocols (e.g., FTP, WebSocket).",
+    "Caching proxied content on the backend.",
+    "Authentication or login-gating for the proxy feature.",
+    "Modifying the Google Custom Search integration."
   ],
   "imageRequirements": {
     "required": [],

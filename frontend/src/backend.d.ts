@@ -26,6 +26,6 @@ export interface http_request_result {
     headers: Array<http_header>;
 }
 export interface backendInterface {
-    proxyGoogleSearch(searchQuery: string): Promise<string>;
+    proxyUrl(url: string): Promise<string>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
 }

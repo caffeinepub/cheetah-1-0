@@ -1,22 +1,54 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T00:02:57.346Z",
-  "summary": "The diff implements REQ-1 fully by wiring the search engine ID 'a566dfe30b89f4713' as the cx parameter in backend/main.mo. REQ-2 is largely implemented via useQueries.ts (search mutation, result parsing, error handling) and referenced components, though the proxy navigation acceptance criterion cannot be satisfied as the proxy is stubbed to always throw.",
+  "generatedAt": "2026-02-26T00:08:37.906Z",
+  "summary": "The diff implements most of the requested features. REQ-1 (backend proxyUrl) and REQ-2 (frontend useProxyUrl mutation) are substantially implemented. REQ-3 (wiring into BrowserLayout.tsx) is mentioned in the file summary but BrowserLayout.tsx content is not shown in the diff. The transform callback exists but proxyUrl returns only Text, not a structured type with headers/status. Several acceptance criteria gaps exist.",
   "missing_requirements": [
     {
+      "id": "REQ-1",
+      "requirement": "The function returns the response body AND HTTP status code (and relevant headers like content-type).",
+      "reason": "The proxyUrl function in backend/main.mo returns only async Text (the response body). There is no structured return type carrying HTTP status code or content-type headers.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
       "id": "REQ-2",
-      "requirement": "Clicking a search result navigates the active tab to the result URL via the proxy.",
-      "reason": "The useProxyRequest hook is stubbed to always throw an error ('Direct URL proxy is not available'), meaning clicking a search result cannot navigate via the proxy as required by the acceptance criteria.",
+      "requirement": "On error, it surfaces an error message usable by the UI.",
+      "reason": "The useProxyRequest mutation in useQueries.ts has no explicit error handling or error message shaping — it simply re-throws the raw actor error with no user-facing transformation.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Wire the direct URL proxy mutation into BrowserLayout.tsx so that entering a URL triggers proxyUrl, proxied HTML is passed to ProxyContent, loading/error states are reflected, and address bar URL is updated after success.",
+      "reason": "BrowserLayout.tsx is listed only in the file summary as modified but its actual diff content is not shown. Cannot verify from available evidence that all REQ-3 acceptance criteria are met.",
+      "evidence": [
+        "frontend-file-summaries.txt"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Migration module (backend/migration.mo) that drops stable variables from a previous actor version.",
+      "reason": "The build request makes no mention of a migration module or dropping stable variables. This is an entirely new file not requested.",
+      "evidence": [
+        "backend/migration.mo"
+      ]
+    },
+    {
+      "description": "useSearchRequest now uses DuckDuckGo HTML search via actor.proxyUrl instead of Google Custom Search.",
+      "reason": "The build request explicitly lists modifying the Google Custom Search integration as a non-goal. The diff replaces the search backend with DuckDuckGo parsing, violating this constraint.",
       "evidence": [
         "frontend/src/hooks/useQueries.ts"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.82,
+  "confidence": 0.72,
   "changed_files": [
     "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
     "frontend/src/hooks/useQueries.ts",
     "project_state.json"

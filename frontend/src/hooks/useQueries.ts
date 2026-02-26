@@ -8,8 +8,8 @@ export function useProxyRequest() {
   return useMutation({
     mutationFn: async (url: string): Promise<string> => {
       if (!actor) throw new Error('Actor not initialized. Please wait and try again.');
-      // Proxy via Google search as a fallback — direct proxy not available
-      throw new Error('Direct URL proxy is not available. Please search for content instead.');
+      const content = await actor.proxyUrl(url);
+      return content;
     },
   });
 }
@@ -34,37 +34,46 @@ export function useSearchRequest() {
   return useMutation({
     mutationFn: async (query: string): Promise<GoogleSearchResponse> => {
       if (!actor) throw new Error('Actor not initialized. Please wait and try again.');
-      const raw = await actor.proxyGoogleSearch(query);
 
-      let parsed: GoogleSearchResponse;
-      try {
-        parsed = JSON.parse(raw) as GoogleSearchResponse;
-      } catch {
-        throw new Error('Failed to parse search results. Please try again.');
-      }
+      // Use the generic proxyUrl to perform a DuckDuckGo HTML search
+      const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+      const raw = await actor.proxyUrl(searchUrl);
 
-      if (parsed.error) {
-        const msg = parsed.error.message || 'Search API error';
-        throw new Error(`Search error (${parsed.error.code}): ${msg}`);
-      }
+      // Parse DuckDuckGo HTML results into our GoogleSearchResult shape
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(raw, 'text/html');
+      const resultElements = doc.querySelectorAll('.result');
 
-      if (!parsed.items || parsed.items.length === 0) {
-        // Return empty results rather than throwing
-        return {
-          items: [],
-          searchInformation: parsed.searchInformation,
-        };
-      }
+      const items: GoogleSearchResult[] = [];
+      resultElements.forEach((el) => {
+        const titleEl = el.querySelector('.result__title a');
+        const snippetEl = el.querySelector('.result__snippet');
+        const urlEl = el.querySelector('.result__url');
 
-      return {
-        items: parsed.items.map(item => ({
-          title: item.title || '',
-          link: item.link || '',
-          snippet: item.snippet || '',
-          displayLink: item.displayLink || '',
-        })),
-        searchInformation: parsed.searchInformation,
-      };
+        const title = titleEl?.textContent?.trim() || '';
+        const snippet = snippetEl?.textContent?.trim() || '';
+        const displayLink = urlEl?.textContent?.trim() || '';
+
+        // Extract the actual href from the result link
+        const href = titleEl?.getAttribute('href') || '';
+        let link = href;
+        if (href.startsWith('//duckduckgo.com/l/?uddg=')) {
+          try {
+            const params = new URLSearchParams(href.split('?')[1]);
+            link = decodeURIComponent(params.get('uddg') || href);
+          } catch {
+            link = href;
+          }
+        } else if (href && !href.startsWith('http')) {
+          link = `https:${href}`;
+        }
+
+        if (title && link) {
+          items.push({ title, link, snippet, displayLink });
+        }
+      });
+
+      return { items };
     },
   });
 }

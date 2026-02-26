@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Wire the Google Custom Search engine ID `a566dfe30b89f4713` into the backend search integration so that real Google search results are returned.
+**Goal:** Enable the Direct URL proxy feature in Cheetah Browser so users can navigate to real web URLs via a backend HTTP outcall proxy.
 
 **Planned changes:**
-- Update the backend Google Custom Search API handler to use `cx=a566dfe30b89f4713` in all outbound search requests.
-- Ensure the frontend passes search queries to the backend, receives results, and displays them (title, snippet, display URL) in the SearchResults component.
-- Ensure clicking a result navigates the active tab to the result URL via the proxy.
+- Add a `proxyUrl(url: Text)` function to the Motoko backend actor that performs an HTTP GET outcall and returns the response body and status code
+- Add a `useProxyUrl` mutation in `frontend/src/hooks/useQueries.ts` that calls the backend `proxyUrl` method and returns proxied HTML content or an error
+- Update `BrowserLayout.tsx` to detect when the address bar input is a URL, trigger the proxy mutation instead of a search, pass the returned HTML to `ProxyContent` for rendering, and reflect loading/error states in the UI
 
-**User-visible outcome:** Users can type a search query in the address bar and receive real Google search results powered by the specified custom search engine.
+**User-visible outcome:** Users can type a direct URL into the address bar and have the page content fetched and displayed via the on-chain proxy, with the address bar updating to the navigated URL on success.

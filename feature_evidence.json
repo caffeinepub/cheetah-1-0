@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-ensure-the-frontend-search-flow-correctly-passes-search-queries-to-the-backend-receives-google-custom-search-results-and-displays-them-in-the-searchresults-component-without-errors",
-      "featureTitle": "Ensure the frontend search flow correctly passes search queries to the backend, receives Google Custom Search results, and displays them in the SearchResults component without errors.",
+      "featureId": "feature-add-a-proxyurl-react-query-mutation-in-frontend-src-hooks-usequeries-ts-that-calls-the-backend-proxyurl-actor-method-parses-the-response-and-returns-the-proxied-content-for-rendering",
+      "featureTitle": "Add a `proxyUrl` React Query mutation in `frontend/src/hooks/useQueries.ts` that calls the backend `proxyUrl` actor method, parses the response, and returns the proxied content for rendering.",
       "files": [
         "frontend/src/hooks/useQueries.ts"
       ],

@@ -1,37 +1,39 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Wire Google Custom Search engine ID into backend search integration",
+  "title": "Enable Direct URL Proxy Feature",
   "requirements": [
     {
       "id": "REQ-2",
-      "summary": "Verify frontend search flow correctly passes queries to backend, receives Google Custom Search results, and displays them without errors",
+      "summary": "Add a proxyUrl React Query mutation in useQueries.ts that calls the backend proxyUrl actor method and returns the proxied content for rendering",
       "acceptanceCriteria": [
-        "Typing a search query in the address bar and pressing Enter triggers a search request to the backend.",
-        "Search results are rendered in the SearchResults component with title, snippet, and display URL.",
-        "Clicking a search result navigates the active tab to the result URL via the proxy.",
-        "No console errors appear during a normal search flow."
+        "A useProxyUrl mutation (or equivalent) is defined in useQueries.ts.",
+        "It calls the backend actor's proxyUrl method with the given URL.",
+        "On success, it returns the proxied HTML content.",
+        "On error, it surfaces an error message usable by the UI."
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Review and verify the useSearchRequest mutation correctly calls the backend's proxyGoogleSearch method and handles the response. Ensure error handling is in place for failed search requests."
-        },
+          "description": "Add a useProxyUrl mutation that calls the backend actor's proxyUrl method with the provided URL string. The mutation should return the proxied HTML content on success and surface error messages on failure. This mutation will be consumed by BrowserLayout to handle direct URL navigation."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Wire the direct URL proxy mutation into BrowserLayout.tsx so that entering a URL in the address bar triggers proxyUrl and renders the returned content in ProxyContent",
+      "acceptanceCriteria": [
+        "Entering a valid URL in the address bar and submitting triggers the proxy mutation, not a search.",
+        "The proxied HTML is passed to ProxyContent for iframe rendering.",
+        "Loading and error states are reflected in the tab bar and UI.",
+        "The address bar URL is updated to reflect the navigated URL after successful proxy."
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/components/BrowserLayout.tsx",
           "operation": "modify",
-          "description": "Review the search flow integration to ensure search queries from the address bar are passed to useSearchRequest mutation, results are stored in the active tab state, and error states are properly handled and displayed to the user."
-        },
-        {
-          "path": "frontend/src/components/SearchResults.tsx",
-          "operation": "modify",
-          "description": "Verify the component correctly parses and renders the search results returned from the backend, including title, snippet, and displayLink fields. Ensure the onNavigate callback is properly wired for result clicks."
-        },
-        {
-          "path": "frontend/src/components/AddressBar.tsx",
-          "operation": "modify",
-          "description": "Review the search detection logic to ensure queries (non-URL input) trigger the search flow rather than proxy navigation. Verify the Enter key and submit button correctly invoke the search handler."
+          "description": "Integrate the useProxyUrl mutation into the navigation flow. When the user enters a URL (detected by AddressBar logic) and submits, call the proxyUrl mutation instead of the search mutation. On success, pass the proxied HTML content to ProxyContent for iframe rendering and update the active tab's URL and content state. Reflect loading and error states in the tab bar and UI. Ensure the address bar URL updates to the navigated URL after successful proxy."
         }
       ]
     }
